@@ -25,7 +25,6 @@ import { getCourses } from "../api/courApi";
 import { useAuth } from "../context/AuthContext";
 import VideoPlayer from "../components/VideoPlayer";
 import PDFReader from "../components/PDFReader";
-import AmazonNavbar from "../components/AmazonNavbar";
 
 export default function CourseDetails() {
   const { id } = useParams();
@@ -152,9 +151,6 @@ export default function CourseDetails() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Amazon Style Navbar */}
-      <AmazonNavbar />
-
       {/* Dark Header Section */}
       <div className="bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

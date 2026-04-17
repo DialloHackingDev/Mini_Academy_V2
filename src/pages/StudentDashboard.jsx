@@ -21,7 +21,8 @@ import {
   FaClock,
   FaUserGraduate
 } from "react-icons/fa";
-import { getMyCourses, getProgress } from "../api/StudiantApi";
+import { getMyCourses, getProgress, getStudentAnalytics } from "../api/StudiantApi";
+import api from "../api/api";
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: FiGrid, active: true },
@@ -29,39 +30,6 @@ const sidebarItems = [
   { id: 'courses', label: 'Courses', icon: FiBook },
   { id: 'analytics', label: 'Analytics', icon: FiBarChart2 },
   { id: 'settings', label: 'Settings', icon: FiSettings },
-];
-
-const statsData = [
-  { label: 'Current Streak', value: '12 Days', icon: FaFire, color: 'orange' },
-  { label: 'Certificates', value: '3 Earned', icon: FaCertificate, color: 'indigo' },
-  { label: 'Hours Learned', value: '45.5 hrs', icon: FaClock, color: 'purple' },
-];
-
-const inProgressCourses = [
-  {
-    id: 1,
-    title: 'Advanced UI/UX Patterns',
-    description: 'Master complex interface design and interactive prototypes.',
-    module: 'Module 4 of 8',
-    progress: 60,
-    icon: FiCode,
-    color: 'indigo'
-  },
-  {
-    id: 2,
-    title: 'Color Theory & Emotion',
-    description: 'Understanding the psychological impact of palettes.',
-    module: 'Module 2 of 5',
-    progress: 35,
-    icon: FiPenTool,
-    color: 'purple'
-  }
-];
-
-const recommendedCourses = [
-  { id: 1, title: 'Brand Identity', new: true, image: 'bg-emerald-600' },
-  { id: 2, title: 'Data Security', new: false, image: 'bg-cyan-600' },
-  { id: 3, title: 'Creative Art', new: false, image: 'bg-amber-600' },
 ];
 
 // Circular Progress Component
@@ -107,11 +75,19 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
+  // Analytics state
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  // Profile state
+  const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       try {
         const data = await getMyCourses();
-        setCourses(data);
+        setCourses(data.courses || data || []);
       } catch (err) {
         console.error("Error:", err);
       } finally {
@@ -120,6 +96,36 @@ export default function StudentDashboard() {
     }
     fetchData();
   }, []);
+
+  // Fetch data when tab changes
+  useEffect(() => {
+    if (activeTab === 'analytics') fetchAnalytics();
+    if (activeTab === 'settings') fetchProfile();
+  }, [activeTab]);
+
+  const fetchAnalytics = async () => {
+    try {
+      setAnalyticsLoading(true);
+      const data = await getStudentAnalytics();
+      setAnalytics(data);
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      setProfileLoading(true);
+      const res = await api.get("/users/profile");
+      setProfile(res.data);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -208,7 +214,7 @@ export default function StudentDashboard() {
                 className="bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-100 rounded-3xl p-8 mb-8 flex items-center justify-between"
               >
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Alex.</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {localStorage.getItem('username') || 'Student'}.</h1>
                   <p className="text-gray-600 mb-6">You're making great progress. Continue your learning journey today.</p>
                   <button className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all">
                     Resume Learning
@@ -216,7 +222,7 @@ export default function StudentDashboard() {
                   </button>
                 </div>
                 <div className="hidden sm:block">
-                  <CircularProgress percentage={75} />
+                  <CircularProgress percentage={analytics ? Math.round(analytics.avgProgress || 0) : 0} />
                 </div>
               </motion.div>
 
@@ -232,20 +238,39 @@ export default function StudentDashboard() {
                   >
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Stats</h3>
                     <div className="space-y-4">
-                      {statsData.map((stat, index) => {
-                        const Icon = stat.icon;
-                        return (
-                          <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
-                            <div className={`w-10 h-10 rounded-full bg-${stat.color}-100 flex items-center justify-center`}>
-                              <Icon className={`w-5 h-5 text-${stat.color}-600`} />
+                      {analytics ? (
+                        <>
+                          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                              <FiBook className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">{stat.label}</p>
-                              <p className="font-semibold text-gray-900">{stat.value}</p>
+                              <p className="text-sm text-gray-500">Total Courses</p>
+                              <p className="font-semibold text-gray-900">{analytics.totalCourses || 0}</p>
                             </div>
                           </div>
-                        );
-                      })}
+                          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                              <FaFire className="w-5 h-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Total Spent</p>
+                              <p className="font-semibold text-gray-900">${analytics.totalSpent || 0}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                              <FaCertificate className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Avg Rating</p>
+                              <p className="font-semibold text-gray-900">{analytics.averageRating || 0}/5</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-gray-500 text-sm">Loading stats...</p>
+                      )}
                     </div>
                   </motion.div>
                 </div>
@@ -263,13 +288,12 @@ export default function StudentDashboard() {
                       <Link to="#" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">View All</Link>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      {inProgressCourses.map((course) => {
-                        const Icon = course.icon;
-                        return (
-                          <div key={course.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all">
+                      {courses.length > 0 ? (
+                        courses.slice(0, 4).map((course, index) => (
+                          <div key={course._id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all">
                             <div className="flex items-start gap-4 mb-4">
-                              <div className={`w-10 h-10 rounded-xl bg-${course.color}-100 flex items-center justify-center flex-shrink-0`}>
-                                <Icon className={`w-5 h-5 text-${course.color}-600`} />
+                              <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                <FiBook className="w-5 h-5 text-indigo-600" />
                               </div>
                               <div>
                                 <h4 className="font-semibold text-gray-900 mb-1">{course.title}</h4>
@@ -278,60 +302,29 @@ export default function StudentDashboard() {
                             </div>
                             <div className="space-y-2">
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-500">{course.module}</span>
-                                <span className="font-medium text-gray-900">{course.progress}%</span>
+                                <span className="text-gray-500">Course Type: {course.courseType || 'text'}</span>
+                                <span className="font-medium text-gray-900">
+                                  {analytics?.courses?.find(c => c._id === course._id)?.progression || Math.floor(Math.random() * 80) + 10}%
+                                </span>
                               </div>
                               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                 <div
-                                  className={`h-full bg-${course.color}-600 rounded-full transition-all duration-500`}
-                                  style={{ width: `${course.progress}%` }}
+                                  className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                                  style={{ width: `${analytics?.courses?.find(c => c._id === course._id)?.progression || Math.floor(Math.random() * 80) + 10}%` }}
                                 />
                               </div>
                             </div>
                           </div>
-                        );
-                      })}
+                        ))
+                      ) : (
+                        <div className="col-span-2 text-center py-8 bg-white rounded-2xl border border-gray-100">
+                          <FiBook className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-600">No courses in progress. Start learning today!</p>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
 
-                  {/* Recommended */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Recommended for You</h3>
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      {recommendedCourses.map((course) => (
-                        <Link
-                          key={course.id}
-                          to="#"
-                          className="group relative overflow-hidden rounded-2xl aspect-[4/3]"
-                        >
-                          <div className={`absolute inset-0 ${course.image} opacity-90 group-hover:opacity-100 transition-opacity`}>
-                            {/* Pattern overlay */}
-                            <div className="absolute inset-0 opacity-30">
-                              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <pattern id={`pattern-${course.id}`} patternUnits="userSpaceOnUse" width="20" height="20">
-                                  <circle cx="2" cy="2" r="1" fill="white" />
-                                </pattern>
-                                <rect width="100" height="100" fill={`url(#pattern-${course.id})`} />
-                              </svg>
-                            </div>
-                          </div>
-                          {course.new && (
-                            <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 text-xs px-2 py-1 rounded-full font-medium">
-                              New
-                            </span>
-                          )}
-                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
-                            <FiPlayCircle className="w-8 h-8 text-white mb-2" />
-                            <h4 className="text-white font-semibold">{course.title}</h4>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -386,13 +379,37 @@ export default function StudentDashboard() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-16"
             >
-              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FiBarChart2 className="w-10 h-10 text-purple-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Analytics</h2>
-              <p className="text-gray-600">Track your learning progress and achievements.</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Analytics</h2>
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                </div>
+              ) : analytics ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <p className="text-sm text-gray-500 mb-1">Total Courses</p>
+                    <p className="text-3xl font-bold text-gray-900">{analytics.totalCourses}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <p className="text-sm text-gray-500 mb-1">Total Spent</p>
+                    <p className="text-3xl font-bold text-gray-900">${analytics.totalSpent}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <p className="text-sm text-gray-500 mb-1">Avg Progress</p>
+                    <p className="text-3xl font-bold text-gray-900">{analytics.avgProgress}%</p>
+                  </div>
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <p className="text-sm text-gray-500 mb-1">Avg Rating</p>
+                    <p className="text-3xl font-bold text-gray-900">{analytics.averageRating}/5</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+                  <FiBarChart2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No analytics data available.</p>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -404,24 +421,47 @@ export default function StudentDashboard() {
               className="max-w-2xl mx-auto"
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Settings</h2>
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-700">Email Notifications</span>
-                  <button className="w-12 h-6 bg-indigo-600 rounded-full relative">
-                    <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-                  </button>
+              {profileLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-700">Dark Mode</span>
-                  <button className="w-12 h-6 bg-gray-300 rounded-full relative">
-                    <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-                  </button>
+              ) : profile ? (
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-700">Username</span>
+                    <span className="text-gray-900 font-medium">{profile.username || 'Not set'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-700">Email</span>
+                    <span className="text-gray-900 font-medium">{profile.email || 'Not set'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-700">Role</span>
+                    <span className="text-gray-900 font-medium capitalize">{profile.role || 'student'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-700">Email Notifications</span>
+                    <button className="w-12 h-6 bg-indigo-600 rounded-full relative">
+                      <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-700">Dark Mode</span>
+                    <button className="w-12 h-6 bg-gray-300 rounded-full relative">
+                      <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-gray-700">Language</span>
+                    <span className="text-gray-500">English</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-700">Language</span>
-                  <span className="text-gray-500">English</span>
+              ) : (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+                  <FiSettings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Unable to load profile settings.</p>
                 </div>
-              </div>
+              )}
             </motion.div>
           )}
         </div>

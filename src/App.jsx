@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar.jsx";
+import AmazonNavbar from "./components/AmazonNavbar.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -18,8 +18,8 @@ export default function App() {
       <Routes>
         {/* 🔹 Routes publiques */}
         <Route path="/" element={<Home />} />
-        <Route path="/courses" element={<><Navbar /><Courses /></>} />
-        <Route path="/courses/:id" element={<><Navbar /><CourseDetails /></>} />
+        <Route path="/courses" element={<><AmazonNavbar /><Courses /></>} />
+        <Route path="/courses/:id" element={<><AmazonNavbar /><CourseDetails /></>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -49,7 +49,7 @@ export default function App() {
         } />
 
         {/* 🔹 Dashboard générique */}
-        <Route path="/dashboard" element={<><Navbar /><Dashboard /></>} />
+        <Route path="/dashboard" element={<><AmazonNavbar /><Dashboard /></>} />
 
         {/* 🔹 Route inconnue → Home */}
         <Route path="*" element={<Navigate to="/" replace />} />
