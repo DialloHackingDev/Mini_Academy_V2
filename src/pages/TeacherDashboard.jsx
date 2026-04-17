@@ -640,8 +640,16 @@ export default function TeacherDashboard() {
                           <tr key={course._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                                  {course.courseType === 'video' ? <FiPlayCircle /> : <FiFileText />}
+                                <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                  {course.coverImage?.filename ? (
+                                    <img 
+                                      src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                                      alt={course.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    course.courseType === 'video' ? <FiPlayCircle /> : <FiFileText />
+                                  )}
                                 </div>
                                 <span className="font-medium text-gray-900">{course.title}</span>
                               </div>

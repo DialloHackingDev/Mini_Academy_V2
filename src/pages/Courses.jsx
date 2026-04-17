@@ -319,11 +319,26 @@ export default function Courses() {
                   className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
                 >
                   {/* Course Image */}
-                  <div className={`h-44 bg-gradient-to-br ${getCourseTypeColor(course.courseType)} flex items-center justify-center relative`}>
-                    <div className="text-center text-white">
-                      {getCourseIcon(course.courseType)}
-                      <p className="text-xs font-medium uppercase tracking-wider mt-2">{course.courseType}</p>
-                    </div>
+                  <div className={`h-44 flex items-center justify-center relative overflow-hidden ${!course.coverImage ? `bg-gradient-to-br ${getCourseTypeColor(course.courseType)}` : ''}`}>
+                    {course.coverImage ? (
+                      <>
+                        <img 
+                          src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.classList.add(`bg-gradient-to-br`, getCourseTypeColor(course.courseType));
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                      </>
+                    ) : (
+                      <div className="text-center text-white">
+                        {getCourseIcon(course.courseType)}
+                        <p className="text-xs font-medium uppercase tracking-wider mt-2">{course.courseType}</p>
+                      </div>
+                    )}
                     
                     {/* Price Badge */}
                     <div className="absolute top-3 right-3">

@@ -289,29 +289,40 @@ export default function StudentDashboard() {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       {courses.length > 0 ? (
-                        courses.slice(0, 4).map((course, index) => (
-                          <div key={course._id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                            <div className="flex items-start gap-4 mb-4">
-                              <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                                <FiBook className="w-5 h-5 text-indigo-600" />
-                              </div>
-                              <div>
-                                <h4 className="font-semibold text-gray-900 mb-1">{course.title}</h4>
-                                <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-500">Course Type: {course.courseType || 'text'}</span>
-                                <span className="font-medium text-gray-900">
-                                  {analytics?.courses?.find(c => c._id === course._id)?.progression || Math.floor(Math.random() * 80) + 10}%
-                                </span>
-                              </div>
-                              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                                  style={{ width: `${analytics?.courses?.find(c => c._id === course._id)?.progression || Math.floor(Math.random() * 80) + 10}%` }}
+                        courses.slice(0, 4).map((course) => (
+                          <div key={course._id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
+                            {course.coverImage?.filename && (
+                              <div className="h-32 bg-gray-100 overflow-hidden">
+                                <img 
+                                  src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                                  alt={course.title}
+                                  className="w-full h-full object-cover"
                                 />
+                              </div>
+                            )}
+                            <div className="p-5">
+                              <div className="flex items-start gap-4 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                  <FiBook className="w-5 h-5 text-indigo-600" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900 mb-1">{course.title}</h4>
+                                  <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-500">Type: {course.courseType || 'text'}</span>
+                                  <span className="font-medium text-gray-900">
+                                    {Math.floor(Math.random() * 80) + 10}%
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                                    style={{ width: `${Math.floor(Math.random() * 80) + 10}%` }}
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -364,9 +375,20 @@ export default function StudentDashboard() {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {courses.map((course) => (
-                    <div key={course._id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                      <h4 className="font-semibold text-gray-900 mb-2">{course.title}</h4>
-                      <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
+                    <div key={course._id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
+                      {course.coverImage?.filename && (
+                        <div className="h-32 bg-gray-100 overflow-hidden">
+                          <img 
+                            src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                            alt={course.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="p-5">
+                        <h4 className="font-semibold text-gray-900 mb-2">{course.title}</h4>
+                        <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
+                      </div>
                     </div>
                   ))}
                 </div>

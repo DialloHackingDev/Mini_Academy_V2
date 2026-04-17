@@ -206,13 +206,26 @@ export default function CourseDetails() {
 
             {/* Video Preview Card (Mobile) */}
             <div className="lg:hidden">
-              <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center">
-                {course.courseType === 'video' ? (
-                  <FiPlayCircle className="w-16 h-16 text-white/80" />
-                ) : course.courseType === 'pdf' ? (
-                  <FiFileText className="w-16 h-16 text-white/80" />
+              <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden relative">
+                {course.coverImage ? (
+                  <img 
+                    src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                    alt={course.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 ) : (
-                  <FiBookOpen className="w-16 h-16 text-white/80" />
+                  <>
+                    {course.courseType === 'video' ? (
+                      <FiPlayCircle className="w-16 h-16 text-white/80" />
+                    ) : course.courseType === 'pdf' ? (
+                      <FiFileText className="w-16 h-16 text-white/80" />
+                    ) : (
+                      <FiBookOpen className="w-16 h-16 text-white/80" />
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -474,16 +487,36 @@ export default function CourseDetails() {
           {/* Right Column - Sticky Sidebar */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-4 space-y-4">
-              {/* Video Preview */}
+              {/* Course Preview - Cover Image or Video */}
               <div className="hidden lg:block aspect-video bg-slate-900 rounded-lg overflow-hidden relative group cursor-pointer">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                    <FiPlay className="w-8 h-8 text-white ml-1" />
-                  </div>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                  <p className="text-white text-sm font-medium">Preview this course</p>
-                </div>
+                {course.coverImage ? (
+                  <>
+                    <img 
+                      src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                        <FiPlay className="w-8 h-8 text-white ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <p className="text-white text-sm font-medium">Preview this course</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                        <FiPlay className="w-8 h-8 text-white ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <p className="text-white text-sm font-medium">Preview this course</p>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Pricing Card */}
