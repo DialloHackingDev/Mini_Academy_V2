@@ -6,6 +6,7 @@ import Register from "./pages/Register.jsx";
 import Courses from "./pages/Courses.jsx";
 import CourseDetails from "./pages/CourseDetails.jsx";
 import CoursePlayer from "./pages/CoursePlayer.jsx";
+import Cart from "./pages/Cart.jsx";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./pages/Dashboard.jsx";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -18,8 +19,9 @@ export default function App() {
       <Routes>
         {/* 🔹 Routes publiques */}
         <Route path="/" element={<Home />} />
-        <Route path="/courses" element={<><AmazonNavbar /><Courses /></>} />
+        <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:id" element={<><AmazonNavbar /><CourseDetails /></>} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 

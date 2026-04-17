@@ -9,13 +9,6 @@ import {
   FiPlayCircle,
   FiUsers,
   FiAward,
-  FiMenu,
-  FiX,
-  FiSearch,
-  FiShoppingCart,
-  FiUser,
-  FiHeart,
-  FiMapPin,
   FiShield,
   FiWifi,
   FiCpu,
@@ -36,11 +29,9 @@ import {
   MdRouter,
   MdOutlineMenuBook
 } from "react-icons/md";
-import { 
-  FaGraduationCap,
-  FaUserGraduate
-} from "react-icons/fa";
 import { getCourses } from "../api/courApi.jsx";
+import AmazonNavbar from "../components/AmazonNavbar.jsx";
+import { FaGraduationCap } from "react-icons/fa";
 
 // Animation hook
 const useAnimatedInView = () => {
@@ -609,7 +600,6 @@ function CoursesSlider({ courses }) {
 export default function Home() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -642,144 +632,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Navbar - Style Amazon */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white">
-        {/* Main Navbar */}
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 h-16">
-            
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <FaGraduationCap className="w-6 h-6 text-white" />
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-lg font-bold text-white leading-tight block">Elevated</span>
-                <span className="text-xs text-indigo-300">Academy</span>
-              </div>
-            </Link>
-
-            {/* Location (mobile only) */}
-            <div className="hidden lg:flex items-center gap-1 text-sm text-gray-300 hover:text-white cursor-pointer flex-shrink-0">
-              <FiMapPin className="w-4 h-4" />
-              <div className="leading-tight">
-                <span className="text-xs text-gray-400 block">Deliver to</span>
-                <span className="font-medium">Guinea</span>
-              </div>
-            </div>
-
-            {/* Search Bar - Center */}
-            <div className="flex-1 max-w-3xl mx-4">
-              <div className="relative flex">
-                {/* Category Dropdown */}
-                <select className="hidden sm:block bg-gray-100 text-gray-700 text-sm px-3 py-2.5 rounded-l-md border-r border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                  <option>All</option>
-                  <option>Courses</option>
-                  <option>Mentors</option>
-                  <option>Resources</option>
-                </select>
-                {/* Search Input */}
-                <input 
-                  type="text" 
-                  placeholder="Search courses, mentors..."
-                  className="flex-1 bg-white text-gray-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:rounded-none rounded-l-md"
-                />
-                {/* Search Button */}
-                <button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-4 py-2.5 rounded-r-md transition-all">
-                  <FiSearch className="w-5 h-5 text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Right Menu */}
-            <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
-              {/* Language Selector */}
-              <div className="hidden md:flex items-center gap-1 cursor-pointer hover:opacity-80">
-                <span className="text-lg">🇬🇧</span>
-                <span className="text-sm font-bold">EN</span>
-              </div>
-
-              {/* Account & Lists */}
-              <Link to="/login" className="hidden sm:block hover:opacity-80 transition-opacity px-2 py-1">
-                <div className="leading-tight text-left">
-                  <span className="text-xs text-gray-400 block">Hello, sign in</span>
-                  <span className="text-sm font-bold">Account & Lists</span>
-                </div>
-              </Link>
-
-              {/* Wishlist */}
-              <button className="hidden md:flex flex-col items-center hover:opacity-80 transition-opacity px-2 py-1">
-                <div className="relative">
-                  <FiHeart className="w-6 h-6" />
-                  <span className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">0</span>
-                </div>
-                <span className="text-xs font-medium">& Orders</span>
-              </button>
-
-              {/* Cart */}
-              <Link to="/courses" className="flex items-center hover:opacity-80 transition-opacity px-2 py-1">
-                <div className="relative">
-                  <FiShoppingCart className="w-7 h-7" />
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
-                </div>
-                <span className="hidden sm:block text-sm font-bold ml-1">Basket</span>
-              </Link>
-
-              {/* Mobile Menu Button */}
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-white hover:text-indigo-300"
-              >
-                {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Sub-Navbar with Categories */}
-        <div className="hidden md:block bg-slate-800 border-t border-slate-700">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-6 h-10 text-sm">
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="flex items-center gap-1 font-bold hover:text-indigo-300 transition-colors"
-              >
-                <FiMenu className="w-5 h-5" />
-                All
-              </button>
-              <Link to="/courses" className="hover:text-indigo-300 transition-colors">Today's Deals</Link>
-              <Link to="#" className="hover:text-indigo-300 transition-colors">Customer Service</Link>
-              <Link to="#" className="hover:text-indigo-300 transition-colors">Registry</Link>
-              <Link to="#" className="hover:text-indigo-300 transition-colors">Gift Cards</Link>
-              <Link to="#" className="hover:text-indigo-300 transition-colors font-semibold text-indigo-300">Sell</Link>
-            </div>
-          </div>
-        </div>
-        
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-slate-800 border-t border-slate-700"
-            >
-              <div className="px-4 py-4 space-y-3">
-                <Link to="/courses" className="block text-gray-300 hover:text-white py-2">Courses</Link>
-                <Link to="#" className="block text-gray-300 hover:text-white py-2">Mentors</Link>
-                <Link to="#" className="block text-gray-300 hover:text-white py-2">Pricing</Link>
-                <Link to="#" className="block text-gray-300 hover:text-white py-2">Resources</Link>
-                <hr className="border-slate-600" />
-                <Link to="/login" className="block text-gray-300 hover:text-white py-2">Sign In</Link>
-                <Link to="/register" className="block bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded text-center font-medium">
-                  Create Account
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+      {/* Navbar - Using AmazonNavbar Component */}
+      <AmazonNavbar />
 
       {/* Hero Banner with Image Slider */}
       <HeroBanner />

@@ -6,6 +6,7 @@ import {
   FiFileText,
   FiDownload,
   FiCheck,
+  FiCheckCircle,
   FiStar,
   FiUsers,
   FiClock,
@@ -36,7 +37,15 @@ export default function CourseDetails() {
   const [relatedCourses, setRelatedCourses] = useState([]);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
   const token = localStorage.getItem("token");
+
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const isInCart = savedCart.some(item => item._id === id);
+    setAddedToCart(isInCart);
+  }, [id]);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -104,6 +113,39 @@ export default function CourseDetails() {
     if (couponCode.trim()) {
       setCouponApplied(true);
     }
+  };
+
+  const addToCart = () => {
+    if (!course) return;
+    
+    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = savedCart.find(item => item._id === course._id);
+    
+    if (existingItem) {
+      navigate('/cart');
+      return;
+    }
+    
+    const cartItem = {
+      _id: course._id,
+      title: course.title,
+      description: course.description,
+      price: course.price,
+      originalPrice: course.originalPrice || Math.round(course.price * 1.5),
+      quantity: 1,
+      image: course.coverImage,
+      instructor: course.professor?.username || course.teacher?.username || 'Instructeur',
+      duration: course.duration || '10 heures',
+      rating: course.rating || 4.5,
+      reviews: course.reviews || 100
+    };
+    
+    const updatedCart = [...savedCart, cartItem];
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    setAddedToCart(true);
+    
+    // Show feedback
+    alert('Cours ajouté au panier !');
   };
 
 
@@ -548,23 +590,67 @@ export default function CourseDetails() {
                     </div>
 
                     {!user || !token ? (
-                      <Link
-                        to="/login"
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors block text-center"
-                      >
-                        Log in to Enroll
-                      </Link>
+                      <div className="space-y-3">
+                        <Link
+                          to="/login"
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors block text-center"
+                        >
+                          Log in to Enroll
+                        </Link>
+                        <button
+                          onClick={addToCart}
+                          className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                            addedToCart
+                              ? 'bg-emerald-600 text-white'
+                              : 'border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                          }`}
+                        >
+                          {addedToCart ? (
+                            <>
+                              <FiCheckCircle className="w-5 h-5" />
+                              Dans le panier
+                            </>
+                          ) : (
+                            <>
+                              <FiShoppingCart className="w-5 h-5" />
+                              Ajouter au panier
+                            </>
+                          )}
+                        </button>
+                      </div>
                     ) : isEnrolled ? (
                       <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition-colors">
                         Continue Learning
                       </button>
                     ) : (
-                      <button
-                        onClick={handleEnroll}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
-                      >
-                        Buy Now
-                      </button>
+                      <div className="space-y-3">
+                        <button
+                          onClick={handleEnroll}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                        >
+                          Buy Now
+                        </button>
+                        <button
+                          onClick={addToCart}
+                          className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                            addedToCart
+                              ? 'bg-emerald-600 text-white'
+                              : 'border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                          }`}
+                        >
+                          {addedToCart ? (
+                            <>
+                              <FiCheckCircle className="w-5 h-5" />
+                              Dans le panier
+                            </>
+                          ) : (
+                            <>
+                              <FiShoppingCart className="w-5 h-5" />
+                              Ajouter au panier
+                            </>
+                          )}
+                        </button>
+                      </div>
                     )}
 
                     {/* Coupon */}

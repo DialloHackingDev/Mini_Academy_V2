@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCourses } from "../api/courApi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FiSearch, 
@@ -10,14 +10,11 @@ import {
   FiBookOpen, 
   FiPlayCircle, 
   FiFileText,
-  FiMenu,
-  FiX,
-  FiShoppingCart,
-  FiUser,
-  FiHeart,
-  FiMapPin
+  FiPlus,
+  FiCheck
 } from "react-icons/fi";
 import { FaGraduationCap } from "react-icons/fa";
+import AmazonNavbar from "../components/AmazonNavbar.jsx";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -28,7 +25,44 @@ export default function Courses() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [addedToCart, setAddedToCart] = useState({});
+  const navigate = useNavigate();
+
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    setCartItems(savedCart);
+  }, []);
+
+  const addToCart = (course) => {
+    const existingItem = cartItems.find(item => item._id === course._id);
+    if (existingItem) {
+      // Item already in cart, show feedback
+      setAddedToCart(prev => ({ ...prev, [course._id]: true }));
+      setTimeout(() => setAddedToCart(prev => ({ ...prev, [course._id]: false })), 2000);
+      navigate('/cart');
+    } else {
+      const cartItem = {
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        originalPrice: course.originalPrice || Math.round(course.price * 1.5),
+        quantity: 1,
+        image: course.coverImage,
+        instructor: course.professor?.username || 'Instructeur',
+        duration: course.duration || '10 heures',
+        rating: course.rating || 4.5,
+        reviews: course.reviews || 100
+      };
+      const updatedCart = [...cartItems, cartItem];
+      setCartItems(updatedCart);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      setAddedToCart(prev => ({ ...prev, [course._id]: true }));
+      setTimeout(() => setAddedToCart(prev => ({ ...prev, [course._id]: false })), 2000);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -138,77 +172,8 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Navbar - Style Amazon */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 h-16">
-            <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <FaGraduationCap className="w-6 h-6 text-white" />
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-lg font-bold text-white leading-tight block">Elevated</span>
-                <span className="text-xs text-indigo-300">Academy</span>
-              </div>
-            </Link>
-
-            <div className="flex-1 max-w-3xl mx-4">
-              <div className="relative flex">
-                <input 
-                  type="text" 
-                  placeholder="Search courses..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="flex-1 bg-white text-gray-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-l-md"
-                />
-                <button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-4 py-2.5 rounded-r-md transition-all">
-                  <FiSearch className="w-5 h-5 text-white" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
-              <Link to="/login" className="hidden sm:block hover:opacity-80 transition-opacity px-2 py-1">
-                <div className="leading-tight text-left">
-                  <span className="text-xs text-gray-400 block">Hello, sign in</span>
-                  <span className="text-sm font-bold">Account</span>
-                </div>
-              </Link>
-
-              <Link to="/courses" className="flex items-center hover:opacity-80 transition-opacity px-2 py-1">
-                <div className="relative">
-                  <FiShoppingCart className="w-7 h-7" />
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
-                </div>
-                <span className="hidden sm:block text-sm font-bold ml-1">Basket</span>
-              </Link>
-
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-white hover:text-indigo-300"
-              >
-                {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-slate-800 border-t border-slate-700"
-            >
-              <div className="px-4 py-4 space-y-3">
-                <Link to="/" className="block text-gray-300 hover:text-white py-2">Home</Link>
-                <Link to="/login" className="block text-gray-300 hover:text-white py-2">Sign In</Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+      {/* Navbar - AmazonNavbar Component */}
+      <AmazonNavbar searchValue={search} onSearchChange={setSearch} />
 
       {/* Main Content */}
       <main className="flex-1 pt-24 pb-12">
@@ -371,13 +336,47 @@ export default function Courses() {
                       </div>
                     )}
 
-                    {/* Button */}
-                    <Link
-                      to={`/courses/${course._id}`}
-                      className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2.5 rounded-lg font-medium text-center hover:shadow-lg hover:shadow-indigo-500/25 transition-all"
-                    >
-                      View Course
-                    </Link>
+                    {/* Buttons */}
+                    <div className="flex gap-2">
+                      {course.price === 0 ? (
+                        <Link
+                          to={`/courses/${course._id}`}
+                          className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-2.5 rounded-lg font-medium text-center hover:shadow-lg transition-all"
+                        >
+                          Commencer gratuitement
+                        </Link>
+                      ) : (
+                        <>
+                          <Link
+                            to={`/courses/${course._id}`}
+                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 rounded-lg font-medium text-center transition-all"
+                          >
+                            Détails
+                          </Link>
+                          <button
+                            onClick={() => addToCart(course)}
+                            disabled={addedToCart[course._id]}
+                            className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-1 ${
+                              addedToCart[course._id]
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg'
+                            }`}
+                          >
+                            {addedToCart[course._id] ? (
+                              <>
+                                <FiCheck className="w-4 h-4" />
+                                Ajouté
+                              </>
+                            ) : (
+                              <>
+                                <FiPlus className="w-4 h-4" />
+                                Panier
+                              </>
+                            )}
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}
