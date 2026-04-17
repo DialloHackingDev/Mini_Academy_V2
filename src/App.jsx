@@ -14,57 +14,46 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 export default function App() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="max-w-6xl mx-auto px-4 py-6">
-          <Routes>
-          {/* 🔹 Routes publiques */}
-          <Route path="/" element={<Home />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetails />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <div className="min-h-screen flex flex-col">
+      <Routes>
+        {/* 🔹 Routes publiques */}
+        <Route path="/" element={<Home />} />
+        <Route path="/courses" element={<><Navbar /><Courses /></>} />
+        <Route path="/courses/:id" element={<><Navbar /><CourseDetails /></>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-          {/* 🔹 Routes protégées */}
-          <Route path="/student-dashboard" element={
-            
-            <PrivateRoute allowedRoles={['eleve']}>
-              <StudentDashboard />
-            </PrivateRoute>
-            
-          } />
+        {/* 🔹 Routes protégées */}
+        <Route path="/student-dashboard" element={
+          <PrivateRoute allowedRoles={['eleve']}>
+            <StudentDashboard />
+          </PrivateRoute>
+        } />
 
-          <Route path="/course-player/:courseId" element={
-            <PrivateRoute allowedRoles={['eleve']}>
-              <CoursePlayer />
-            </PrivateRoute>
-          } />
+        <Route path="/course-player/:courseId" element={
+          <PrivateRoute allowedRoles={['eleve']}>
+            <CoursePlayer />
+          </PrivateRoute>
+        } />
 
-          <Route path="/teacher-dashboard" element={
-            <PrivateRoute allowedRoles={['prof']}>
-              <TeacherDashboard />
-            </PrivateRoute>
-            
-          } />
+        <Route path="/teacher-dashboard" element={
+          <PrivateRoute allowedRoles={['prof']}>
+            <TeacherDashboard />
+          </PrivateRoute>
+        } />
 
-          <Route path="/admin-dashboard" element={
-            
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </PrivateRoute>
-            
-            
-          } />
-          
+        <Route path="/admin-dashboard" element={
+          <PrivateRoute allowedRoles={['admin']}>
+            <AdminDashboard />
+          </PrivateRoute>
+        } />
 
-          {/* 🔹 Dashboard générique si tu veux */}
-          <Route path="/dashboard" element={<Dashboard />} />
+        {/* 🔹 Dashboard générique */}
+        <Route path="/dashboard" element={<><Navbar /><Dashboard /></>} />
 
-          {/* 🔹 Route inconnue → Home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        
-      </main>
+        {/* 🔹 Route inconnue → Home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }

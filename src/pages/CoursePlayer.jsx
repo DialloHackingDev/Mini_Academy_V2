@@ -114,7 +114,7 @@ export default function CoursePlayer() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="w-full mx-auto px-6 sm:px-8 lg:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
@@ -166,7 +166,7 @@ export default function CoursePlayer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="w-full mx-auto px-6 sm:px-8 lg:px-12 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
       {/* Main Content */}
           <div className="lg:col-span-3">

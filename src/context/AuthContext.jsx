@@ -42,17 +42,17 @@ export function AuthProvider({ children }) {
     }
 
     // Écouter les événements de déconnexion depuis l'intercepteur API
+    let logoutInProgress = false;
     const handleAuthLogout = () => {
-      if (isMounted) {
+      if (isMounted && !logoutInProgress) {
+        logoutInProgress = true;
         logout();
-        navigate('/login', { replace: true });
+        // Ne pas naviguer ici car l'intercepteur API gère déjà la redirection
       }
     };
 
-    // Seulement ajouter l'event listener si on a un token
-    if (token) {
-      window.addEventListener('auth-logout', handleAuthLogout);
-    }
+    // Ajouter l'event listener
+    window.addEventListener('auth-logout', handleAuthLogout);
     
     return () => {
       isMounted = false;
@@ -83,21 +83,8 @@ export function AuthProvider({ children }) {
     };
 
     setUser(newUser);
-
-    // Redirection automatique vers le dashboard approprié
-    const dashboardMap = {
-      eleve: "/student-dashboard",
-      prof: "/teacher-dashboard",
-      admin: "/admin-dashboard"
-    };
-    
-    const targetDashboard = dashboardMap[userData.role];
-    if (targetDashboard) {
-      setTimeout(() => {
-        navigate(targetDashboard, { replace: true });
-      }, 100);
-    }
-  }, [navigate]);
+    // La redirection est gérée par le composant Login.jsx
+  }, []);
 
   const logout = useCallback(() => {
     // Nettoyage complet du localStorage

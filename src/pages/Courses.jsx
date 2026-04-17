@@ -1,8 +1,23 @@
 import { useEffect, useState } from "react";
 import { getCourses } from "../api/courApi";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { FaSearch, FaFilter, FaSort, FaBookOpen, FaVideo, FaFilePdf, FaFileAlt } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  FiSearch, 
+  FiFilter, 
+  FiArrowUp, 
+  FiArrowDown,
+  FiBookOpen, 
+  FiPlayCircle, 
+  FiFileText,
+  FiMenu,
+  FiX,
+  FiShoppingCart,
+  FiUser,
+  FiHeart,
+  FiMapPin
+} from "react-icons/fi";
+import { FaGraduationCap } from "react-icons/fa";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -13,17 +28,17 @@ export default function Courses() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:3000/api/course");
-      const data = await res.json();
+      const data = await getCourses();
       const coursesData = data.data || data;
       setCourses(coursesData);
       setFilteredCourses(coursesData);
     } catch (e) {
-      console.error(e);
+      console.error("Error fetching courses:", e);
     } finally {
       setLoading(false);
     }
@@ -82,276 +97,279 @@ export default function Courses() {
     setFilteredCourses(filtered);
   }, [courses, search, priceFilter, typeFilter, sortBy]);
 
-  const getCourseIcon = (courseType) => {
-    switch (courseType) {
+  // Helper function pour les couleurs de gradient
+  const getCourseTypeColor = (type) => {
+    switch (type) {
       case "video":
-        return <FaVideo className="w-6 h-6" />;
+        return "from-rose-500 to-pink-600";
       case "pdf":
-        return <FaFilePdf className="w-6 h-6" />;
+        return "from-indigo-500 to-purple-600";
       case "text":
-        return <FaFileAlt className="w-6 h-6" />;
+        return "from-emerald-500 to-teal-600";
       default:
-        return <FaBookOpen className="w-6 h-6" />;
+        return "from-slate-500 to-gray-600";
     }
   };
 
-  const getCourseTypeColor = (courseType) => {
-    switch (courseType) {
+  // Helper function pour les icônes
+  const getCourseIcon = (type) => {
+    switch (type) {
       case "video":
-        return "from-red-500 to-pink-600";
+        return <FiPlayCircle className="w-12 h-12" />;
       case "pdf":
-        return "from-blue-500 to-indigo-600";
+        return <FiFileText className="w-12 h-12" />;
       case "text":
-        return "from-green-500 to-teal-600";
+        return <FiBookOpen className="w-12 h-12" />;
       default:
-        return "from-gray-500 to-gray-600";
+        return <FiBookOpen className="w-12 h-12" />;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des cours...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading courses...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">📚 Catalogue des Cours</h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Découvrez notre collection complète de cours créés par des experts passionnés
-            </p>
-            <div className="mt-8 flex items-center justify-center space-x-4 text-blue-200">
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-yellow-300">{courses.length}</span>
-                <span>Cours disponibles</span>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Navbar - Style Amazon */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 h-16">
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                <FaGraduationCap className="w-6 h-6 text-white" />
               </div>
-              <div className="w-px h-6 bg-blue-300"></div>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-green-300">
-                  {courses.filter(c => c.price === 0).length}
-                </span>
-                <span>Cours gratuits</span>
+              <div className="hidden sm:block">
+                <span className="text-lg font-bold text-white leading-tight block">Elevated</span>
+                <span className="text-xs text-indigo-300">Academy</span>
+              </div>
+            </Link>
+
+            <div className="flex-1 max-w-3xl mx-4">
+              <div className="relative flex">
+                <input 
+                  type="text" 
+                  placeholder="Search courses..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="flex-1 bg-white text-gray-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-l-md"
+                />
+                <button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-4 py-2.5 rounded-r-md transition-all">
+                  <FiSearch className="w-5 h-5 text-white" />
+                </button>
               </div>
             </div>
-          </motion.div>
+
+            <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
+              <Link to="/login" className="hidden sm:block hover:opacity-80 transition-opacity px-2 py-1">
+                <div className="leading-tight text-left">
+                  <span className="text-xs text-gray-400 block">Hello, sign in</span>
+                  <span className="text-sm font-bold">Account</span>
+                </div>
+              </Link>
+
+              <Link to="/courses" className="flex items-center hover:opacity-80 transition-opacity px-2 py-1">
+                <div className="relative">
+                  <FiShoppingCart className="w-7 h-7" />
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </div>
+                <span className="hidden sm:block text-sm font-bold ml-1">Basket</span>
+              </Link>
+
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 text-white hover:text-indigo-300"
+              >
+                {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg p-6 mb-8"
-        >
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="h-5 w-5 text-gray-400" />
-            </div>
-        <input
-          type="text"
-              placeholder="Rechercher un cours, un professeur..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          {/* Filter Toggle */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              <FaFilter className="w-4 h-4" />
-              <span>Filtres et tri</span>
-            </button>
-            <div className="text-sm text-gray-500">
-              {filteredCourses.length} cours trouvé{filteredCourses.length > 1 ? 's' : ''}
-            </div>
-          </div>
-
-          {/* Filters */}
-          {showFilters && (
+        
+        <AnimatePresence>
+          {mobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200"
+              className="md:hidden bg-slate-800 border-t border-slate-700"
             >
-              {/* Price Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Prix</label>
-                <select
-                  value={priceFilter}
-                  onChange={(e) => setPriceFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Tous les prix</option>
-          <option value="free">Gratuits</option>
-          <option value="paid">Payants</option>
-        </select>
-              </div>
-
-              {/* Type Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type de cours</label>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Tous les types</option>
-                  <option value="video">Vidéo</option>
-                  <option value="pdf">PDF</option>
-                  <option value="text">Texte</option>
-                </select>
-      </div>
-
-              {/* Sort */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Trier par</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="newest">Plus récents</option>
-                  <option value="oldest">Plus anciens</option>
-                  <option value="price-low">Prix croissant</option>
-                  <option value="price-high">Prix décroissant</option>
-                  <option value="title">Titre A-Z</option>
-                </select>
+              <div className="px-4 py-4 space-y-3">
+                <Link to="/" className="block text-gray-300 hover:text-white py-2">Home</Link>
+                <Link to="/login" className="block text-gray-300 hover:text-white py-2">Sign In</Link>
               </div>
             </motion.div>
           )}
-        </motion.div>
+        </AnimatePresence>
+      </nav>
 
-        {/* Courses Grid */}
-        {filteredCourses.length === 0 ? (
+      {/* Main Content */}
+      <main className="flex-1 pt-24 pb-12">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Header */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
           >
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Aucun cours trouvé</h3>
-            <p className="text-gray-600 mb-6">
-              Essayez de modifier vos critères de recherche ou de filtres.
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">All Courses</h1>
+            <p className="text-gray-600">
+              {filteredCourses.length} {filteredCourses.length > 1 ? 'courses' : 'course'} available
             </p>
-            <button
-              onClick={() => {
-                setSearch("");
-                setPriceFilter("all");
-                setTypeFilter("all");
-                setSortBy("newest");
-              }}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Réinitialiser les filtres
-            </button>
           </motion.div>
-        ) : (
+
+          {/* Filters Bar */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8"
           >
-            {filteredCourses.map((course, index) => (
-              <motion.div
-                key={course._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-colors font-medium"
               >
-                {/* Course Header */}
-                <div className={`h-48 bg-gradient-to-br ${getCourseTypeColor(course.courseType)} flex items-center justify-center relative`}>
-                  <div className="text-center text-white">
-                    <div className="text-4xl mb-2">
-                      {getCourseIcon(course.courseType)}
-                    </div>
-                    <p className="text-sm font-medium capitalize">{course.courseType}</p>
-                  </div>
-                  
-                  {/* Price Badge */}
-                  <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      course.price === 0 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-white/20 backdrop-blur-sm text-white'
-                    }`}>
-                      {course.price === 0 ? 'Gratuit' : `${course.price}€`}
-                    </span>
-                  </div>
+                <FiFilter className="w-4 h-4" />
+                Filters
+              </button>
+              
+              <div className="h-6 w-px bg-gray-300 hidden sm:block"></div>
+              
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="title">Name: A-Z</option>
+              </select>
 
-                  {/* Professor Badge */}
-                  {course.professor && (
-                    <div className="absolute top-4 left-4">
-                      <div className="flex items-center space-x-2 bg-black/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
-                        <span>👨‍🏫</span>
-                        <span>{course.professor.username}</span>
-                      </div>
+              <select
+                value={priceFilter}
+                onChange={(e) => setPriceFilter(e.target.value)}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="all">All Prices</option>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
+
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="all">All Types</option>
+                <option value="video">Video</option>
+                <option value="pdf">PDF</option>
+                <option value="text">Text</option>
+              </select>
             </div>
-          )}
-                </div>
+          </motion.div>
 
-                {/* Course Content */}
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                    {course.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
-                    {course.description}
-                  </p>
-
-                  {/* Course Meta */}
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <span>📅</span>
-                      <span>
-                        {course.createdAt 
-                          ? new Date(course.createdAt).toLocaleDateString()
-                          : 'Date inconnue'
-                        }
+          {/* Courses Grid */}
+          {filteredCourses.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiSearch className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No courses found</h3>
+              <p className="text-gray-600 mb-6">Try adjusting your search or filters</p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setPriceFilter("all");
+                  setTypeFilter("all");
+                  setSortBy("newest");
+                }}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all"
+              >
+                Clear filters
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              {filteredCourses.map((course, index) => (
+                <motion.div
+                  key={course._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
+                >
+                  {/* Course Image */}
+                  <div className={`h-44 bg-gradient-to-br ${getCourseTypeColor(course.courseType)} flex items-center justify-center relative`}>
+                    <div className="text-center text-white">
+                      {getCourseIcon(course.courseType)}
+                      <p className="text-xs font-medium uppercase tracking-wider mt-2">{course.courseType}</p>
+                    </div>
+                    
+                    {/* Price Badge */}
+                    <div className="absolute top-3 right-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        course.price === 0 
+                          ? 'bg-emerald-500 text-white' 
+                          : 'bg-white/90 text-gray-900'
+                      }`}>
+                        {course.price === 0 ? 'Free' : `$${course.price}`}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <span>📊</span>
-                      <span className="capitalize">{course.courseType}</span>
-                    </div>
                   </div>
 
-                  {/* Action Button */}
-          <Link
-            to={`/courses/${course._id}`}
-                    className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold text-center hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform group-hover:scale-105"
-          >
-            Voir le cours
-          </Link>
+                  {/* Course Content */}
+                  <div className="p-5">
+                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                      {course.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {course.description}
+                    </p>
+
+                    {/* Instructor */}
+                    {course.professor && (
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white text-xs font-bold">
+                          {course.professor.username?.[0]?.toUpperCase() || 'P'}
+                        </div>
+                        <span className="text-xs text-gray-500">{course.professor.username}</span>
+                      </div>
+                    )}
+
+                    {/* Button */}
+                    <Link
+                      to={`/courses/${course._id}`}
+                      className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2.5 rounded-lg font-medium text-center hover:shadow-lg hover:shadow-indigo-500/25 transition-all"
+                    >
+                      View Course
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
-              </motion.div>
-      ))}
-          </motion.div>
-        )}
-      </div>
+      </main>
     </div>
   );
 }

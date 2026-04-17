@@ -210,7 +210,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="w-full mx-auto px-6 sm:px-8 lg:px-12 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">🔧 Dashboard Administrateur</h1>
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="w-full mx-auto px-6 sm:px-8 lg:px-12 py-8">
         
         {/* Navigation */}
         <div className="flex flex-wrap gap-2 mb-8 bg-white p-4 rounded-2xl shadow-lg">
@@ -798,7 +798,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === "profile" && (
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <ProfileComponent />
           </div>
         )}

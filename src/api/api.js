@@ -42,14 +42,24 @@ api.interceptors.response.use(
       const isLoginAttempt = error.config?.url?.includes('/login') || 
                             error.config?.url?.includes('/register');
       
-      if (!isLoginAttempt) {
-        
+      // Vérifier si on est déjà sur la page login (éviter boucle infinie)
+      const isAlreadyOnLogin = window.location.pathname === '/login';
+      
+      if (!isLoginAttempt && !isAlreadyOnLogin) {
         console.error('🚨 Token rejeté par le serveur:', error.response?.data?.message);
         
-        // Nettoyer le localStorage et rediriger
-        localStorage.clear();
-        window.location.href = '/login';
+        // Nettoyer UNIQUEMENT les données d'auth (pas tout le localStorage !)
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('username');
+        localStorage.removeItem('email');
+        localStorage.removeItem('userId');
         
+        // Émettre un événement pour que le contexte Auth se mette à jour
+        window.dispatchEvent(new Event('auth-logout'));
+        
+        // Redirection seulement si pas déjà sur login
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);
