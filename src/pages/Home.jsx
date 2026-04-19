@@ -68,7 +68,7 @@ function HeroBanner() {
   };
 
   return (
-    <section className="relative w-full pt-[6.5rem]">
+    <section className="relative w-full pt-0">
       {/* Main Banner Container */}
       <div className="relative w-full h-[400px] sm:h-[450px] lg:h-[500px] overflow-hidden bg-gray-900">
         {/* Images Slider */}

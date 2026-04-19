@@ -48,7 +48,7 @@ export default function AdminDashboard() {
   const [viewingMedia, setViewingMedia] = useState(null);
   
   const [userForm, setUserForm] = useState({ username: "", email: "", password: "", role: "eleve" });
-  const [courseForm, setCourseForm] = useState({ title: "", description: "", price: "", courseType: "text", content: "", videoUrl: "" });
+  const [courseForm, setCourseForm] = useState({ title: "", description: "", price: "", category: "Développement Web", courseType: "text", content: "", videoUrl: "" });
   const [pdfFile, setPdfFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
       await updateCourseAdmin(selectedCourse._id, courseForm);
       fetchDashboardData();
       setSelectedCourse(null);
-      setCourseForm({ title: "", description: "", price: "", courseType: "text", content: "", videoUrl: "" });
+      setCourseForm({ title: "", description: "", price: "", category: "Développement Web", courseType: "text", content: "", videoUrl: "" });
       alert("Cours modifié!");
     } catch (error) { alert("Erreur lors de la modification"); }
   };
@@ -109,7 +109,13 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       const formData = new FormData();
-      Object.keys(courseForm).forEach(key => formData.append(key, courseForm[key]));
+      Object.keys(courseForm).forEach(key => {
+        if (key === 'price') {
+          formData.append(key, Number(courseForm[key]) || 0);
+        } else {
+          formData.append(key, courseForm[key]);
+        }
+      });
       if (coverImage) formData.append("coverImage", coverImage);
       if (courseForm.courseType === "pdf" && pdfFile) formData.append("pdfFile", pdfFile);
       if (courseForm.courseType === "video" && videoFile) formData.append("videoFile", videoFile);
@@ -120,9 +126,18 @@ export default function AdminDashboard() {
         body: formData,
       });
       if (!res.ok) throw new Error("Erreur lors de la création");
-      fetchDashboardData();
-      alert("Cours créé !");
+      setCourseForm({ title: "", description: "", price: "", courseType: "text", content: "", videoUrl: "", category: "Développement Web" }); 
+      setCoverImage(null); 
+      setPdfFile(null); 
+      setVideoFile(null); 
+      fetchDashboardData(); 
+      alert("Cours créé ! ✅");
     } catch (error) { alert(error.message); }
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (!confirm("Supprimer ce cours ?")) return;
+    try { await deleteCourseAdmin(courseId); fetchDashboardData(); alert("Cours supprimé!"); } catch (error) { alert("Erreur lors de la suppression"); }
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-screen">Chargement...</div>;
@@ -232,10 +247,10 @@ export default function AdminDashboard() {
                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
                       <h2 className="text-xl font-black mb-8">{selectedUser ? "Modifier" : "Créer"} Utilisateur</h2>
                       <form onSubmit={selectedUser ? (e)=>{e.preventDefault(); handleUpdateUser();} : handleCreateUser} className="space-y-4">
-                         <input type="text" placeholder="Nom" value={userForm.username} onChange={e=>setUserForm({...userForm, username: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />
-                         <input type="email" placeholder="Email" value={userForm.email} onChange={e=>setUserForm({...userForm, email: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />
-                         {!selectedUser && <input type="password" placeholder="Pass" value={userForm.password} onChange={e=>setUserForm({...userForm, password: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />}
-                         <select value={userForm.role} onChange={e=>setUserForm({...userForm, role: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
+                         <input type="text" placeholder="Nom" value={userForm.username || ""} onChange={e=>setUserForm({...userForm, username: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />
+                         <input type="email" placeholder="Email" value={userForm.email || ""} onChange={e=>setUserForm({...userForm, email: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />
+                         {!selectedUser && <input type="password" placeholder="Pass" value={userForm.password || ""} onChange={e=>setUserForm({...userForm, password: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />}
+                         <select value={userForm.role || "eleve"} onChange={e=>setUserForm({...userForm, role: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
                             <option value="eleve">Élève</option>
                             <option value="prof">Professeur</option>
                             <option value="admin">Admin</option>
@@ -284,17 +299,48 @@ export default function AdminDashboard() {
                       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
                          <h2 className="text-xl font-black mb-8">Nouveau Cours (Admin)</h2>
                          <form onSubmit={handleCreateCourseAdmin} className="space-y-4">
-                            <input type="text" placeholder="Titre" value={courseForm.title} onChange={e=>setCourseForm({...courseForm, title: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" required />
-                            <textarea placeholder="Description" value={courseForm.description} onChange={e=>setCourseForm({...courseForm, description: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none h-32" required />
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Titre</label>
+                               <input type="text" placeholder="Titre" value={courseForm.title || ""} onChange={e=>setCourseForm({...courseForm, title: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold" required />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
-                               <input type="number" placeholder="Prix" value={courseForm.price} onChange={e=>setCourseForm({...courseForm, price: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none" />
-                               <select value={courseForm.courseType} onChange={e=>setCourseForm({...courseForm, courseType: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
-                                  <option value="text">Texte</option>
-                                  <option value="pdf">PDF</option>
-                                  <option value="video">Vidéo</option>
+                               <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Prix (€)</label>
+                                  <input type="number" placeholder="0 pour gratuit" value={courseForm.price || ""} onChange={e=>setCourseForm({...courseForm, price: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold" />
+                               </div>
+                               <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Type</label>
+                                  <select value={courseForm.courseType || "text"} onChange={e=>setCourseForm({...courseForm, courseType: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
+                                     <option value="text">Texte</option>
+                                     <option value="pdf">PDF</option>
+                                     <option value="video">Vidéo</option>
+                                  </select>
+                               </div>
+                            </div>
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Catégorie</label>
+                               <select value={courseForm.category || "Autre"} onChange={e=>setCourseForm({...courseForm, category: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
+                                  <option value="Développement Web">Développement Web</option>
+                                  <option value="Développement Mobile">Développement Mobile</option>
+                                  <option value="Data Science">Data Science</option>
+                                  <option value="IA & Machine Learning">IA & Machine Learning</option>
+                                  <option value="DevOps & Cloud">DevOps & Cloud</option>
+                                  <option value="Conception & UI/UX">Conception & UI/UX</option>
+                                  <option value="Marketing Digital">Marketing Digital</option>
+                                  <option value="Gestion de Projet">Gestion de Projet</option>
+                                  <option value="Langue & Communication">Langue & Communication</option>
+                                  <option value="Autre">Autre</option>
                                </select>
                             </div>
-                            <button type="submit" className="w-full py-4 bg-green-600 text-white rounded-xl font-black shadow-lg shadow-green-500/20">Publier</button>
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Image de couverture</label>
+                               <input type="file" onChange={e=>setCoverImage(e.target.files[0])} className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" accept="image/*" />
+                            </div>
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Description</label>
+                               <textarea placeholder="Description" value={courseForm.description || ""} onChange={e=>setCourseForm({...courseForm, description: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold h-32" required />
+                            </div>
+                            <button type="submit" className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black shadow-lg shadow-emerald-500/20 uppercase tracking-widest text-xs">Publier le cours</button>
                          </form>
                       </div>
                    </div>
