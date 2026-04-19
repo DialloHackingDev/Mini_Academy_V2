@@ -62,7 +62,8 @@ export default function Login() {
         role: data.user.role,
         username: data.user.username,
         email: data.user.email,
-        _id: data.user._id
+        _id: data.user._id,
+        profileImage: data.user.profileImage
       };
 
       login(userData);

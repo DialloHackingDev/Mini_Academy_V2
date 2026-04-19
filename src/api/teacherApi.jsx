@@ -34,3 +34,9 @@ export const getTeacherAnalytics = async () => {
   const res = await api.get("/dashboard/teacher/analytics");
   return res.data;
 };
+
+// ✅ Retirer un élève d'un cours
+export const removeStudent = async (courseId, studentId) => {
+  const res = await api.delete(`/dashboard/teacher/course/${courseId}/student/${studentId}`);
+  return res.data;
+};

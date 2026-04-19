@@ -17,8 +17,10 @@ import {
 } from "react-icons/fi";
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -26,19 +28,30 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   const [searchInput, setSearchInput] = useState(searchValue);
   const navigate = useNavigate();
   const location = useLocation();
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  const username = localStorage.getItem("username");
 
-  // Load cart count from localStorage on mount
+  const token = user?.token;
+  const role = user?.role;
+  const username = user?.username;
+  const profileImage = user?.profileImage;
+
+  // Load cart count from localStorage on mount and sync
   useEffect(() => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartCount(cart.length);
+    const updateCount = () => {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      setCartCount(cart.length);
+    };
+
+    updateCount();
+    
+    // Check for changes every second to keep synced across components
+    const interval = setInterval(updateCount, 1000);
     
     // Simulate notifications (in real app, fetch from API)
     if (token) {
       setNotificationCount(3); // Example: 3 unread notifications
     }
+
+    return () => clearInterval(interval);
   }, [token]);
 
   // Update search input when prop changes
@@ -69,9 +82,8 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("username");
+    logout();
+    setUserMenuOpen(false);
     navigate("/login");
   };
 
@@ -209,8 +221,12 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center gap-2 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold">{username?.[0]?.toUpperCase() || 'U'}</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center overflow-hidden">
+                      {profileImage ? (
+                        <img src={`http://localhost:5000/uploads/profiles/${profileImage}`} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <span className="text-sm font-bold">{username?.[0]?.toUpperCase() || 'U'}</span>
+                      )}
                     </div>
                     <span className="text-sm font-medium hidden xl:block">{username || 'User'}</span>
                   </button>

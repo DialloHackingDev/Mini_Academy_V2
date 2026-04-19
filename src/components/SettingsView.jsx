@@ -12,6 +12,7 @@ import {
   FiHelpCircle
 } from "react-icons/fi";
 import api from "../api/api";
+import { useAuth } from "../context/AuthContext";
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: FiUser },
@@ -21,6 +22,7 @@ const tabs = [
 ];
 
 export default function SettingsView({ userProfile, onProfileUpdate }) {
+  const { updateUserData } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -58,6 +60,10 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
       if (res.data.success) {
         setSuccess("Profile updated successfully!");
         if (onProfileUpdate) onProfileUpdate(res.data.user);
+        updateUserData({ 
+          username: res.data.user.username, 
+          profileImage: res.data.user.profileImage 
+        });
       }
     } catch (err) {
       setError(err.response?.data?.msg || "Error updating profile");
@@ -120,8 +126,40 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                 <div>
                   <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1">Photo de profil</h3>
                   <p className="text-[10px] md:text-sm text-gray-500 mb-4">Taille recommandée: 400x400px.</p>
+                  <input 
+                    type="file" 
+                    id="profile-upload" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      
+                      const formData = new FormData();
+                      formData.append('profileImage', file);
+                      
+                      setLoading(true);
+                      try {
+                        const res = await api.put("/users/profile", formData, {
+                          headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        if (res.data.success) {
+                          setSuccess("Photo de profil mise à jour !");
+                          if (onProfileUpdate) onProfileUpdate(res.data.user);
+                          updateUserData({ profileImage: res.data.user.profileImage });
+                        }
+                      } catch (err) {
+                        setError("Erreur lors de l'upload de l'image");
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  />
                   <div className="flex justify-center sm:justify-start gap-3">
-                    <button className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg text-xs md:text-sm font-semibold hover:bg-emerald-100 transition-colors">
+                    <button 
+                      onClick={() => document.getElementById('profile-upload').click()}
+                      className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg text-xs md:text-sm font-semibold hover:bg-emerald-100 transition-all"
+                    >
                       Modifier
                     </button>
                     <button className="px-4 py-2 text-gray-600 text-xs md:text-sm font-semibold hover:bg-gray-50 rounded-lg transition-colors">

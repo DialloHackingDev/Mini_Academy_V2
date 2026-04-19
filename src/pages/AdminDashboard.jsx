@@ -31,6 +31,7 @@ import VideoPlayer from "../components/VideoPlayer";
 import PDFReader from "../components/PDFReader";
 import ProfileComponent from "../components/ProfileComponent";
 import SettingsView from "../components/SettingsView";
+import { useAuth } from "../context/AuthContext";
 
 import { useSearchParams } from "react-router-dom";
 
@@ -42,6 +43,7 @@ const sidebarItems = [
 ];
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   
@@ -168,7 +170,19 @@ export default function AdminDashboard() {
         {/* Sidebar Desktop */}
         <aside className="w-80 bg-white border-r border-gray-200 hidden lg:flex flex-col">
           <div className="flex-1 py-10 px-6 space-y-3">
-             <div className="px-5 mb-8"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Console Admin</p></div>
+             <div className="px-5 mb-8 flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/20 overflow-hidden">
+                   {user?.profileImage ? (
+                     <img src={`http://localhost:5000/uploads/profiles/${user.profileImage}`} className="w-full h-full object-cover" alt="" />
+                   ) : (
+                     user?.username?.[0]?.toUpperCase() || 'A'
+                   )}
+                </div>
+                <div>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin</p>
+                   <p className="text-sm font-bold text-slate-900">{user?.username}</p>
+                </div>
+             </div>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               return (

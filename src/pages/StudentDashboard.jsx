@@ -26,6 +26,7 @@ import AmazonNavbar from "../components/AmazonNavbar";
 import SettingsView from "../components/SettingsView";
 import AnalyticsView from "../components/AnalyticsView";
 import ProfileComponent from "../components/ProfileComponent";
+import { useAuth } from "../context/AuthContext";
 
 import { useSearchParams } from "react-router-dom";
 
@@ -37,6 +38,7 @@ const sidebarItems = [
 ];
 
 export default function StudentDashboard() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "dashboard";
@@ -93,8 +95,21 @@ export default function StudentDashboard() {
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar (Desktop) */}
-        <aside className="w-72 bg-white border-r border-gray-200 hidden lg:flex flex-col">
-          <div className="flex-1 py-8 px-4 space-y-2">
+        <aside className="w-80 bg-white border-r border-gray-200 hidden lg:flex flex-col">
+          <div className="flex-1 py-10 px-6 space-y-3">
+             <div className="px-5 mb-8 flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20 overflow-hidden">
+                   {user?.profileImage ? (
+                     <img src={`http://localhost:5000/uploads/profiles/${user.profileImage}`} className="w-full h-full object-cover" alt="" />
+                   ) : (
+                     user?.username?.[0]?.toUpperCase() || 'E'
+                   )}
+                </div>
+                <div>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Élève</p>
+                   <p className="text-sm font-bold text-slate-900">{user?.username}</p>
+                </div>
+             </div>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;

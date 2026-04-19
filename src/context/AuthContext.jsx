@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
     const username = localStorage.getItem("username");
     const email = localStorage.getItem("email");
     const userId = localStorage.getItem("userId");
+    const profileImage = localStorage.getItem("profileImage");
 
     if (isMounted) {
       if (token && role) {
@@ -33,7 +34,8 @@ export function AuthProvider({ children }) {
           role,
           username: username || "Utilisateur",
           email: email || "",
-          _id: userId || ""
+          _id: userId || "",
+          profileImage: profileImage || ""
         });
       } else {
         setUser(null);
@@ -72,6 +74,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem("username", userData.username || "Utilisateur");
     localStorage.setItem("email", userData.email || "");
     localStorage.setItem("userId", userData._id || "");
+    localStorage.setItem("profileImage", userData.profileImage || "");
 
     // Création de l'objet utilisateur
     const newUser = {
@@ -79,11 +82,22 @@ export function AuthProvider({ children }) {
       role: userData.role,
       username: userData.username || "Utilisateur",
       email: userData.email || "",
-      _id: userData._id || ""
+      _id: userData._id || "",
+      profileImage: userData.profileImage || ""
     };
 
     setUser(newUser);
     // La redirection est gérée par le composant Login.jsx
+  }, []);
+
+  const updateUserData = useCallback((newData) => {
+    setUser(prev => {
+      const updated = { ...prev, ...newData };
+      // Sync with localStorage
+      if (newData.username) localStorage.setItem("username", newData.username);
+      if (newData.profileImage) localStorage.setItem("profileImage", newData.profileImage);
+      return updated;
+    });
   }, []);
 
   const logout = useCallback(() => {
@@ -100,9 +114,10 @@ export function AuthProvider({ children }) {
     user,
     login,
     logout,
+    updateUserData,
     loading,
     isAuthenticated: !!user && !!user.token
-  }), [user, login, logout, loading]);
+  }), [user, login, logout, updateUserData, loading]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -22,57 +22,7 @@ import {
 import { FaGraduationCap, FaPaypal, FaApple, FaGooglePay } from "react-icons/fa";
 import AmazonNavbar from "../components/AmazonNavbar";
 
-// Sample recommended courses
-const recommendedCourses = [
-  {
-    _id: 'rec1',
-    title: "Python Avancé",
-    description: "Maîtrisez Python avec des concepts avancés",
-    price: 89,
-    originalPrice: 129,
-    rating: 4.8,
-    reviews: 342,
-    image: null,
-    duration: "15 heures",
-    level: "Avancé"
-  },
-  {
-    _id: 'rec2',
-    title: "React & TypeScript",
-    description: "Développez des apps modernes avec React",
-    price: 79,
-    originalPrice: 119,
-    rating: 4.9,
-    reviews: 256,
-    image: null,
-    duration: "12 heures",
-    level: "Intermédiaire"
-  },
-  {
-    _id: 'rec3',
-    title: "DevOps Fondamentaux",
-    description: "Apprenez CI/CD, Docker et Kubernetes",
-    price: 99,
-    originalPrice: 149,
-    rating: 4.7,
-    reviews: 189,
-    image: null,
-    duration: "20 heures",
-    level: "Débutant"
-  },
-  {
-    _id: 'rec4',
-    title: "Machine Learning",
-    description: "Introduction au ML avec Python",
-    price: 109,
-    originalPrice: 159,
-    rating: 4.8,
-    reviews: 421,
-    image: null,
-    duration: "25 heures",
-    level: "Intermédiaire"
-  }
-];
+import { getCourses } from "../api/courApi";
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -83,47 +33,36 @@ export default function Cart() {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loadingRecs, setLoadingRecs] = useState(true);
   const navigate = useNavigate();
 
   // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    // Add mock items if cart is empty for demonstration
-    if (savedCart.length === 0) {
-      const mockCart = [
-        {
-          _id: '1',
-          title: "Introduction à la Cybersécurité",
-          description: "Apprenez les bases de la sécurité informatique",
-          price: 49,
-          originalPrice: 99,
-          quantity: 1,
-          image: null,
-          instructor: "Dr. Sarah Chen",
-          duration: "12 heures",
-          rating: 4.8,
-          reviews: 1240
-        },
-        {
-          _id: '2',
-          title: "Data Science avec Python",
-          description: "Maîtrisez pandas, numpy et matplotlib",
-          price: 79,
-          originalPrice: 129,
-          quantity: 1,
-          image: null,
-          instructor: "Prof. Michel Dubois",
-          duration: "20 heures",
-          rating: 4.9,
-          reviews: 892
-        }
-      ];
-      setCartItems(mockCart);
-      localStorage.setItem('cart', JSON.stringify(mockCart));
-    } else {
-      setCartItems(savedCart);
-    }
+    setCartItems(savedCart);
+    fetchRecommendations();
   }, []);
+
+  const fetchRecommendations = async () => {
+    try {
+      setLoadingRecs(true);
+      const data = await getCourses();
+      const coursesData = data.data || data;
+      // Get 4 random courses as recommendations, excluding what's already in cart
+      const currentCartIds = new Set(JSON.parse(localStorage.getItem('cart') || '[]').map(item => item._id));
+      const filtered = coursesData
+        .filter(c => !currentCartIds.has(c._id))
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 4);
+      setRecommendations(filtered);
+    } catch (err) {
+      console.error("Error fetching recommendations:", err);
+    } finally {
+      setLoadingRecs(false);
+    }
+  };
+
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -155,7 +94,22 @@ export default function Cart() {
     if (existingItem) {
       updateQuantity(course._id, 1);
     } else {
-      setCartItems([...cartItems, { ...course, quantity: 1 }]);
+      const cartItem = {
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        originalPrice: course.originalPrice || Math.round(course.price * 1.5) || (course.price + 30),
+        quantity: 1,
+        image: course.coverImage,
+        instructor: course.professor?.username || 'Instructeur',
+        duration: course.duration || '12 heures',
+        rating: course.rating || 4.5,
+        reviews: course.reviews || 120
+      };
+      setCartItems([...cartItems, cartItem]);
+      // Remove from recommendations if added
+      setRecommendations(prev => prev.filter(r => r._id !== course._id));
     }
   };
 
@@ -498,21 +452,25 @@ export default function Cart() {
           )}
 
           {/* Recommendations */}
-          {cartItems.length > 0 && (
+          {recommendations.length > 0 && (
             <div className="mt-16">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Ces cours pourraient vous intéresser
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {recommendedCourses.map((course) => (
+                {recommendations.map((course) => (
                   <motion.div
                     key={course._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                      <FaGraduationCap className="w-12 h-12 text-indigo-400" />
+                    <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center overflow-hidden">
+                      {course.coverImage ? (
+                        <img src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <FaGraduationCap className="w-12 h-12 text-indigo-400" />
+                      )}
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
@@ -523,16 +481,18 @@ export default function Cart() {
                       </p>
                       <div className="flex items-center gap-1 mb-3">
                         <FiStar className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="text-sm font-medium">{course.rating}</span>
-                        <span className="text-xs text-gray-500">({course.reviews})</span>
+                        <span className="text-sm font-medium">{course.rating || 4.5}</span>
+                        <span className="text-xs text-gray-500">({course.reviews || 89})</span>
                       </div>
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-lg font-bold text-gray-900">
                           ${course.price}
                         </span>
-                        <span className="text-sm text-gray-500 line-through">
-                          ${course.originalPrice}
-                        </span>
+                        {course.price > 0 && (
+                          <span className="text-sm text-gray-500 line-through">
+                            ${Math.round(course.price * 1.5)}
+                          </span>
+                        )}
                       </div>
                       <button
                         onClick={() => addToCart(course)}
