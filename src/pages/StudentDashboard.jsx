@@ -51,6 +51,7 @@ export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [profile, setProfile] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [courseSearch, setCourseSearch] = useState('');
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -307,12 +308,20 @@ export default function StudentDashboard() {
                     <h2 className="text-3xl font-black text-slate-900">Mes Cours</h2>
                     <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
                        <FiSearch className="text-gray-400" />
-                       <input type="text" placeholder="Rechercher un cours..." className="bg-transparent border-0 focus:ring-0 text-sm font-medium outline-none" />
+                       <input
+                         type="text"
+                         placeholder="Rechercher un cours..."
+                         value={courseSearch}
+                         onChange={(e) => setCourseSearch(e.target.value)}
+                         className="bg-transparent border-0 focus:ring-0 text-sm font-medium outline-none w-48"
+                       />
                     </div>
                   </div>
                   
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {courses.map((course) => (
+                    {courses
+                      .filter(c => c.title?.toLowerCase().includes(courseSearch.toLowerCase()))
+                      .map((course) => (
                       <div key={course._id} className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all">
                         <div className="h-40 bg-slate-100">
                            <img 
@@ -334,6 +343,14 @@ export default function StudentDashboard() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Empty state when no results */}
+                  {courses.filter(c => c.title?.toLowerCase().includes(courseSearch.toLowerCase())).length === 0 && (
+                    <div className="text-center py-16 text-gray-400">
+                      <FiSearch className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                      <p className="font-medium">Aucun cours trouvé pour « {courseSearch} »</p>
+                    </div>
+                  )}
                 </motion.div>
               )}
 

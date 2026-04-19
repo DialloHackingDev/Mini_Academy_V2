@@ -1,15 +1,8 @@
 import api from "./api";
 
-// ✅ Dashboard admin - récupérer tous les utilisateurs et cours
 export const getAdminDashboard = async () => {
   const res = await api.get("/dashboard/admin");
   return res.data;
-};
-
-// ✅ Gestion des utilisateurs
-export const getAllUsers = async () => {
-  const res = await api.get("/dashboard/admin");
-  return res.data.users;
 };
 
 export const createUser = async (userData) => {
@@ -32,10 +25,9 @@ export const disableUser = async (userId) => {
   return res.data;
 };
 
-// ✅ Gestion des cours (admin)
-export const getAllCourses = async () => {
-  const res = await api.get("/dashboard/admin");
-  return res.data.courses;
+export const createCourseAdmin = async (courseData) => {
+  const res = await api.post(`/dashboard/admin/course`, courseData);
+  return res.data;
 };
 
 export const updateCourseAdmin = async (courseId, courseData) => {
