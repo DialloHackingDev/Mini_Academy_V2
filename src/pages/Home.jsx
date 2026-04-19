@@ -324,7 +324,7 @@ function FreeCoursesSlider({ courses }) {
                     <div className="relative h-40 bg-gray-100 overflow-hidden">
                       {course.coverImage ? (
                         <img
-                          src={`http://localhost:3000/uploads/covers/${typeof course.coverImage === 'string' ? course.coverImage : course.coverImage.filename}`}
+                          src={`http://localhost:5000/uploads/covers/${typeof course.coverImage === 'string' ? course.coverImage : course.coverImage.filename}`}
                           alt={course.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -520,7 +520,7 @@ function CoursesSlider({ courses }) {
                       <div className="relative h-40 bg-gray-100 overflow-hidden">
                         {course.coverImage ? (
                           <img
-                            src={`http://localhost:3000/uploads/covers/${typeof course.coverImage === 'string' ? course.coverImage : course.coverImage.filename}`}
+                            src={`http://localhost:5000/uploads/covers/${typeof course.coverImage === 'string' ? course.coverImage : course.coverImage.filename}`}
                             alt={course.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {

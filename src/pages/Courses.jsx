@@ -135,11 +135,11 @@ export default function Courses() {
   const getCourseTypeColor = (type) => {
     switch (type) {
       case "video":
-        return "from-rose-500 to-pink-600";
-      case "pdf":
-        return "from-indigo-500 to-purple-600";
-      case "text":
         return "from-emerald-500 to-teal-600";
+      case "pdf":
+        return "from-emerald-600 to-teal-700";
+      case "text":
+        return "from-emerald-400 to-emerald-500";
       default:
         return "from-slate-500 to-gray-600";
     }
@@ -163,7 +163,7 @@ export default function Courses() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading courses...</p>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function Courses() {
             <div className="flex flex-wrap items-center gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-colors font-medium"
+                className="flex items-center gap-2 text-gray-700 hover:text-emerald-600 transition-colors font-medium"
               >
                 <FiFilter className="w-4 h-4" />
                 Filters
@@ -212,7 +212,7 @@ export default function Courses() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
@@ -224,7 +224,7 @@ export default function Courses() {
               <select
                 value={priceFilter}
                 onChange={(e) => setPriceFilter(e.target.value)}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="all">All Prices</option>
                 <option value="free">Free</option>
@@ -234,7 +234,7 @@ export default function Courses() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="all">All Types</option>
                 <option value="video">Video</option>
@@ -263,7 +263,7 @@ export default function Courses() {
                   setTypeFilter("all");
                   setSortBy("newest");
                 }}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all"
               >
                 Clear filters
               </button>
@@ -288,7 +288,7 @@ export default function Courses() {
                     {course.coverImage ? (
                       <>
                         <img 
-                          src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                          src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`}
                           alt={course.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -319,7 +319,7 @@ export default function Courses() {
 
                   {/* Course Content */}
                   <div className="p-5">
-                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors">
                       {course.title}
                     </h3>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -359,7 +359,7 @@ export default function Courses() {
                             className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-1 ${
                               addedToCart[course._id]
                                 ? 'bg-emerald-500 text-white'
-                                : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg'
+                                : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-lg'
                             }`}
                           >
                             {addedToCart[course._id] ? (

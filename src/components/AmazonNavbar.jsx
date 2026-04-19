@@ -16,6 +16,7 @@ import {
   FiHeart
 } from "react-icons/fi";
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -328,101 +329,108 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
         </div>
       )}
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-slate-800 border-t border-slate-700">
-          <div className="px-4 py-3 space-y-1">
-            <Link to="/" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              <FiGrid className="w-5 h-5" />
-              Accueil
-            </Link>
-            <Link to="/courses" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              <FiBook className="w-5 h-5" />
-              Cours
-            </Link>
-            
-            {!token ? (
-              <>
-                <Link to="/login" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiUser className="w-5 h-5" />
-                  Connexion
-                </Link>
-                <Link to="/register" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiPlusCircle className="w-5 h-5" />
-                  S'inscrire
-                </Link>
-                <Link to="/register?role=prof" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FaChalkboardTeacher className="w-5 h-5" />
-                  Devenir Professeur
-                </Link>
-              </>
-            ) : (
-              <>
-                <div className="py-2 px-3 border-t border-slate-700 mt-2">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Mon Compte</p>
-                </div>
-                <Link to="/notifications" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiBell className="w-5 h-5" />
-                  Notifications
-                  {notificationCount > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {notificationCount}
-                    </span>
-                  )}
-                </Link>
-                <Link to="/wishlist" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiHeart className="w-5 h-5" />
-                  Favoris
-                </Link>
-                <Link to="/cart" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiShoppingCart className="w-5 h-5" />
-                  Mon Panier
-                  {cartCount > 0 && (
-                    <span className="ml-auto bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
-                <Link to="/profile" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiUser className="w-5 h-5" />
-                  Mon Profil
-                </Link>
-                <Link to={getDashboardLink()} className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  <FiGrid className="w-5 h-5" />
-                  Dashboard
-                </Link>
-                {role === 'eleve' && (
-                  <Link to="/student-dashboard?tab=mycourses" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                    <FiPlayCircle className="w-5 h-5" />
-                    Mon Apprentissage
-                  </Link>
-                )}
-                {role === 'prof' && (
-                  <>
-                    <Link to="/teacher-dashboard?tab=courses" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                      <FiBook className="w-5 h-5" />
-                      Mes Cours
-                    </Link>
-                    <Link to="/teacher-dashboard?tab=create" className="flex items-center gap-2 py-3 px-3 hover:bg-slate-700 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                      <FiPlusCircle className="w-5 h-5" />
-                      Créer un Cours
-                    </Link>
-                  </>
-                )}
-                <div className="border-t border-slate-700 mt-2 pt-2">
-                  <button 
-                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                    className="flex items-center gap-2 w-full py-3 px-3 text-red-400 hover:bg-slate-700 rounded-lg transition-colors"
-                  >
-                    <FiLogOut className="w-5 h-5" />
-                    Déconnexion
+      {/* Mobile Menu Sidebar */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60]"
+            />
+            <motion.aside 
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed top-0 right-0 bottom-0 w-80 bg-slate-900 z-[70] shadow-2xl flex flex-col overflow-y-auto"
+            >
+               <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center">
+                      <FaGraduationCap className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="font-bold text-white">Elevated</span>
+                  </div>
+                  <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-400 hover:text-white">
+                    <FiX className="w-6 h-6" />
                   </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+               </div>
+
+               <div className="p-6 space-y-6">
+                  {/* User Profile Info on Mobile */}
+                  {token && (
+                    <div className="flex items-center gap-4 p-4 bg-slate-800 rounded-2xl mb-4">
+                       <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center font-bold text-lg">
+                          {username?.[0]?.toUpperCase()}
+                       </div>
+                       <div>
+                          <p className="font-bold text-white">{username}</p>
+                          <p className="text-xs text-slate-400 capitalize">{role}</p>
+                       </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <Link to="/" className="flex items-center gap-3 py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                      <FiGrid className="w-5 h-5" />
+                      Accueil
+                    </Link>
+                    <Link to="/courses" className="flex items-center gap-3 py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                      <FiBook className="w-5 h-5" />
+                      Tous les Cours
+                    </Link>
+                  </div>
+
+                  {!token ? (
+                    <div className="grid grid-cols-1 gap-3 pt-4 border-t border-slate-800">
+                      <Link to="/login" className="flex items-center justify-center py-3 bg-slate-800 rounded-xl font-bold" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+                      <Link to="/register" className="flex items-center justify-center py-3 bg-emerald-600 rounded-xl font-bold" onClick={() => setMobileMenuOpen(false)}>S'inscrire</Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 pt-4 border-t border-slate-800">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-3 mb-2">Mon Espace</p>
+                      <Link to={getDashboardLink()} className="flex items-center gap-3 py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                        <FiGrid className="w-5 h-5" />
+                        Dashboard
+                      </Link>
+                      {role === 'eleve' && (
+                        <Link to="/student-dashboard?tab=mycourses" className="flex items-center gap-3 py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                          <FiPlayCircle className="w-5 h-5" />
+                          Mon Apprentissage
+                        </Link>
+                      )}
+                      {role === 'prof' && (
+                        <Link to="/teacher-dashboard?tab=create" className="flex items-center gap-3 py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                          <FiPlusCircle className="w-5 h-5" />
+                          Créer un Cours
+                        </Link>
+                      )}
+                      <Link to="/cart" className="flex items-center justify-between py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                        <div className="flex items-center gap-3">
+                           <FiShoppingCart className="w-5 h-5" />
+                           Panier
+                        </div>
+                        {cartCount > 0 && <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{cartCount}</span>}
+                      </Link>
+                      <Link to="/settings" className="flex items-center gap-3 py-3 px-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all" onClick={() => setMobileMenuOpen(false)}>
+                        <FiSettings className="w-5 h-5" />
+                        Paramètres
+                      </Link>
+                      <div className="pt-6">
+                        <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-3 bg-red-500/10 text-red-500 rounded-xl font-bold">
+                           <FiLogOut /> Déconnexion
+                        </button>
+                      </div>
+                    </div>
+                  )}
+               </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

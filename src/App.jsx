@@ -5,7 +5,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Courses from "./pages/Courses.jsx";
 import CourseDetails from "./pages/CourseDetails.jsx";
-import CoursePlayer from "./pages/CoursePlayer.jsx";
+import CourseViewer from "./pages/CourseViewer.jsx";
 import Cart from "./pages/Cart.jsx";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -34,7 +34,7 @@ export default function App() {
 
         <Route path="/course-player/:courseId" element={
           <PrivateRoute allowedRoles={['eleve']}>
-            <CoursePlayer />
+            <CourseViewer />
           </PrivateRoute>
         } />
 

@@ -1,7 +1,7 @@
 import api from "./api"
 
 // const api = axios.create({
-//   baseURL: "http://localhost:3000/api",
+//   baseURL: "http://localhost:5000/api",
 //   withCredentials: true, // si JWT stocké en cookie
 // });
 

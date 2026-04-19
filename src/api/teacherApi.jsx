@@ -1,9 +1,9 @@
 import api from "./api";
 
-// ✅ Obtenir les cours du professeur connecté
-export const getMyCourses = async () => {
+// ✅ Récupérer le dashboard du professeur
+export const getTeacherDashboard = async () => {
   const res = await api.get("/dashboard/teacher");
-  return res.data.courses;
+  return res.data;
 };
 
 // ✅ Créer un cours

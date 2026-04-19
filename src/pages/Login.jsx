@@ -212,6 +212,7 @@ export default function Login() {
                   value={form.email}
                   placeholder="Enter your email"
                   onChange={handleChange}
+                  autoComplete="email"
                   className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
                   required
                   disabled={loading}
@@ -230,6 +231,7 @@ export default function Login() {
                   value={form.password}
                   placeholder="••••••••"
                   onChange={handleChange}
+                  autoComplete="current-password"
                   className="w-full pl-12 pr-12 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
                   required
                   disabled={loading}

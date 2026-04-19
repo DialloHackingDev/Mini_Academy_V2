@@ -1,57 +1,38 @@
 @import "tailwindcss";
 
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
 /* Styles globaux pour la hauteur complète */
 html, body, #root {
-  min-height: 100vh;
   height: 100%;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Responsive - Éviter le débordement horizontal */
-html {
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
 body {
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Classes utilitaires pour le troncage de texte */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  @apply bg-slate-50 text-slate-900 antialiased;
 }
 
 /* Scrollbar personnalisée */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  @apply bg-slate-200 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  @apply bg-slate-300;
 }

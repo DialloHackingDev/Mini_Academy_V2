@@ -114,9 +114,9 @@ export default function CourseReader({ course, onDownload, className = "" }) {
         {course.courseType === "video" ? (
           course.videoFile ? (
             <VideoPlayer
-              src={`http://localhost:3000/uploads/videos/${course.videoFile.filename}`}
+              src={`http://localhost:5000/uploads/videos/${course.videoFile.filename}`}
               title={course.title}
-              downloadUrl={`http://localhost:3000/api/course/${course._id}/download/video`}
+              downloadUrl={`http://localhost:5000/api/course/${course._id}/download/video`}
               className="h-[600px]"
             />
           ) : course.videoUrl ? (
@@ -135,9 +135,9 @@ export default function CourseReader({ course, onDownload, className = "" }) {
         ) : course.courseType === "pdf" ? (
           course.pdfFile ? (
             <PDFReader
-              src={`http://localhost:3000/uploads/pdfs/${course.pdfFile.filename}`}
+              src={`http://localhost:5000/uploads/pdfs/${course.pdfFile.filename}`}
               title={course.title}
-              downloadUrl={`http://localhost:3000/api/course/${course._id}/download/pdf`}
+              downloadUrl={`http://localhost:5000/api/course/${course._id}/download/pdf`}
             />
           ) : (
             <div className="bg-gray-100 p-12 text-center">

@@ -25,7 +25,7 @@ export {
 
 // API Professeur
 export { 
-  getMyCourses as getTeacherCourses, 
+  getTeacherDashboard, 
   createCourse, 
   updateCourse, 
   deleteCourse, 

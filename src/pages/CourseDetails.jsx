@@ -251,7 +251,7 @@ export default function CourseDetails() {
               <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden relative">
                 {course.coverImage ? (
                   <img 
-                    src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                    src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`}
                     alt={course.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -318,7 +318,7 @@ export default function CourseDetails() {
                   {/* Show video if available and enrolled/free */}
                   {(course.price === 0 || isEnrolled) && token && course.videoFile?.filename ? (
                     <VideoPlayer
-                      src={`http://localhost:3000/uploads/videos/${course.videoFile.filename}`}
+                      src={`http://localhost:5000/uploads/videos/${course.videoFile.filename}`}
                       title={course.title}
                       className="h-[400px] rounded-lg"
                     />
@@ -355,7 +355,7 @@ export default function CourseDetails() {
                   
                   {(course.price === 0 || isEnrolled) && token && course.pdfFile?.filename ? (
                     <PDFReader
-                      src={`http://localhost:3000/uploads/pdfs/${course.pdfFile.filename}`}
+                      src={`http://localhost:5000/uploads/pdfs/${course.pdfFile.filename}`}
                       title={course.title}
                     />
                   ) : (
@@ -534,7 +534,7 @@ export default function CourseDetails() {
                 {course.coverImage ? (
                   <>
                     <img 
-                      src={`http://localhost:3000/uploads/covers/${course.coverImage.filename}`}
+                      src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`}
                       alt={course.title}
                       className="w-full h-full object-cover"
                     />
