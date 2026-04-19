@@ -23,9 +23,13 @@ import { FaGraduationCap, FaPaypal, FaApple, FaGooglePay } from "react-icons/fa"
 import AmazonNavbar from "../components/AmazonNavbar";
 
 import { getCourses } from "../api/courApi";
+import api from "../api/api";
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,10 +41,8 @@ export default function Cart() {
   const [loadingRecs, setLoadingRecs] = useState(true);
   const navigate = useNavigate();
 
-  // Load cart from localStorage on mount
+  // Load recommendations on mount
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartItems(savedCart);
     fetchRecommendations();
   }, []);
 
@@ -132,16 +134,34 @@ export default function Cart() {
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setPaymentSuccess(true);
     
-    // Clear cart after successful payment
-    setTimeout(() => {
-      setCartItems([]);
-      localStorage.removeItem('cart');
-    }, 3000);
+    try {
+      // Simulate 2s payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Register each purchased course in the backend
+      const purchasePromises = cartItems.map(item =>
+        api.post(`/purchase/${item._id}`).catch(err => {
+          // Ignore "already purchased" errors (course may already be bought)
+          console.warn(`Could not purchase ${item._id}:`, err.response?.data?.msg || err.message);
+        })
+      );
+      await Promise.all(purchasePromises);
+
+      setIsProcessing(false);
+      setPaymentSuccess(true);
+
+      // Clear cart after successful payment
+      setTimeout(() => {
+        setCartItems([]);
+        localStorage.removeItem('cart');
+      }, 3000);
+
+    } catch (err) {
+      console.error('Payment error:', err);
+      setIsProcessing(false);
+      alert("Une erreur est survenue lors du paiement. Veuillez réessayer.");
+    }
   };
 
   if (paymentSuccess) {
