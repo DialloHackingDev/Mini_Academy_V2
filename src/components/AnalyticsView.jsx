@@ -50,15 +50,16 @@ export default function AnalyticsView({ stats, courses = [] }) {
     { name: "Canada", percentage: 12, color: "emerald" },
   ];
 
-  // Derived stats from courses if stats prop is empty
-  const totalStudents = courses.reduce((acc, c) => acc + (c.students?.length || 0), 0);
-  const totalRevenue = courses.reduce((acc, c) => acc + ((c.price || 0) * (c.students?.length || 0)), 0);
-
+  // Derived stats
+  const totalStudents = stats?.totalStudents ?? courses.reduce((acc, c) => acc + (c.students?.length || 0), 0);
+  const totalRevenue = stats?.totalRevenue ?? courses.reduce((acc, c) => acc + ((c.price || 0) * (c.students?.length || 0)), 0);
+  const avgRating = stats?.averageRating ?? 0;
+  
   const displayStats = [
-    { label: "Revenu Total", value: `${totalRevenue.toLocaleString()}€`, change: "+12.5%", isPositive: true, icon: FiDollarSign, color: "emerald" },
-    { label: "Taux de Réussite", value: "78.4%", change: "+3.2%", isPositive: true, icon: FiCheckCircle, color: "blue" },
-    { label: "Satisfaction", value: "4.9/5.0", change: "0%", isPositive: true, icon: FiStar, color: "amber" },
-    { label: "Élèves Inscrits", value: totalStudents.toLocaleString(), change: "+8.4%", isPositive: true, icon: FiUsers, color: "indigo" },
+    { label: "Revenu Total", value: `${totalRevenue.toLocaleString()}€`, change: stats?.revenueGrowth ? `+${stats.revenueGrowth}%` : "+0%", isPositive: true, icon: FiDollarSign, color: "emerald" },
+    { label: "Taux de Réussite", value: "100%", change: "+0%", isPositive: true, icon: FiCheckCircle, color: "blue" },
+    { label: "Satisfaction", value: `${avgRating}/5.0`, change: "0%", isPositive: true, icon: FiStar, color: "amber" },
+    { label: "Élèves Inscrits", value: totalStudents.toLocaleString(), change: stats?.studentGrowth ? `+${stats.studentGrowth}%` : "+0%", isPositive: true, icon: FiUsers, color: "indigo" },
   ];
 
   return (
@@ -168,7 +169,7 @@ export default function AnalyticsView({ stats, courses = [] }) {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-4xl font-black text-slate-900">24k</span>
+              <span className="text-4xl font-black text-slate-900">{(totalStudents * 1.5).toFixed(1)}k</span>
               <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Sessions</span>
             </div>
           </div>
@@ -196,7 +197,7 @@ export default function AnalyticsView({ stats, courses = [] }) {
             </div>
           </div>
           <div className="space-y-6">
-             {(courses.length > 0 ? courses.slice(0, 3) : []).map((course, i) => (
+             {(courses.length > 0 ? [...courses].sort((a, b) => (b.students?.length || 0) - (a.students?.length || 0)).slice(0, 3) : []).map((course, i) => (
                 <div key={i} className="flex items-center justify-between group cursor-pointer">
                    <div className="flex items-center gap-5">
                       <div className="w-14 h-14 bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center text-slate-400">
@@ -208,12 +209,12 @@ export default function AnalyticsView({ stats, courses = [] }) {
                       </div>
                       <div>
                          <p className="text-sm font-black text-slate-900 group-hover:text-emerald-600 transition-colors">{course.title}</p>
-                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Bestseller</p>
+                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{i === 0 ? 'Bestseller' : 'Populaire'}</p>
                       </div>
                    </div>
                    <div className="text-right">
                       <p className="text-sm font-black text-slate-900">{course.students?.length || 0} Élèves</p>
-                      <p className="text-[10px] font-bold text-slate-400">{(course.students?.length * course.price || 0).toLocaleString()}€ récoltés</p>
+                      <p className="text-[10px] font-bold text-slate-400">{((course.students?.length || 0) * (course.price || 0)).toLocaleString()}€ récoltés</p>
                    </div>
                 </div>
              ))}

@@ -25,6 +25,9 @@ import api from "../api/api";
 import AmazonNavbar from "../components/AmazonNavbar";
 import SettingsView from "../components/SettingsView";
 import AnalyticsView from "../components/AnalyticsView";
+import ProfileComponent from "../components/ProfileComponent";
+
+import { useSearchParams } from "react-router-dom";
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: FiGrid },
@@ -35,11 +38,26 @@ const sidebarItems = [
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "dashboard";
+  
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [profile, setProfile] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
 
   useEffect(() => {
     fetchInitialData();
@@ -83,7 +101,7 @@ export default function StudentDashboard() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group ${
                     isActive
                       ? 'bg-emerald-50 text-emerald-600 shadow-sm'
@@ -121,7 +139,7 @@ export default function StudentDashboard() {
                  return (
                     <button 
                        key={item.id}
-                       onClick={() => setActiveTab(item.id)}
+                       onClick={() => handleTabChange(item.id)}
                        className={`flex flex-col items-center justify-center gap-1 min-w-[64px] transition-all ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}
                     >
                        <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>

@@ -30,22 +30,40 @@ import {
 import VideoPlayer from "../components/VideoPlayer";
 import PDFReader from "../components/PDFReader";
 import ProfileComponent from "../components/ProfileComponent";
+import SettingsView from "../components/SettingsView";
+
+import { useSearchParams } from "react-router-dom";
 
 const sidebarItems = [
   { id: "overview", label: "Vue d'ensemble", icon: FiBarChart2 },
   { id: "users", label: "Utilisateurs", icon: FiUsers },
   { id: "courses", label: "Gestion Cours", icon: FiBook },
-  { id: "profile", label: "Mon Profil", icon: FiUser },
+  { id: "settings", label: "Paramètres", icon: FiSettings },
 ];
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "overview";
+  
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [viewingMedia, setViewingMedia] = useState(null);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
   
   const [userForm, setUserForm] = useState({ username: "", email: "", password: "", role: "eleve" });
   const [courseForm, setCourseForm] = useState({ title: "", description: "", price: "", category: "Développement Web", courseType: "text", content: "", videoUrl: "" });
@@ -154,7 +172,7 @@ export default function AdminDashboard() {
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               return (
-                <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' : 'text-slate-500 hover:bg-slate-50'}`}>
+                <button key={item.id} onClick={() => handleTabChange(item.id)} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' : 'text-slate-500 hover:bg-slate-50'}`}>
                   <div className="flex items-center gap-4">
                     <Icon className="w-5 h-5" />
                     <span className="font-bold text-sm tracking-wide">{item.label}</span>
@@ -175,7 +193,7 @@ export default function AdminDashboard() {
                  return (
                     <button 
                        key={item.id}
-                       onClick={() => setActiveTab(item.id)}
+                       onClick={() => handleTabChange(item.id)}
                        className={`flex flex-col items-center justify-center gap-1 min-w-[64px] transition-all ${isActive ? 'text-blue-600' : 'text-slate-400'}`}
                     >
                        <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-blue-50' : ''}`}>
@@ -347,9 +365,9 @@ export default function AdminDashboard() {
                 </motion.div>
               )}
 
-              {activeTab === 'profile' && (
-                <motion.div key="profile" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                   <ProfileComponent />
+              {activeTab === 'settings' && (
+                <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                   <SettingsView />
                 </motion.div>
               )}
             </AnimatePresence>

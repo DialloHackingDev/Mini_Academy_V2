@@ -223,14 +223,6 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                         <p className="text-xs text-gray-500 capitalize">{role === 'eleve' ? 'Élève' : role === 'prof' ? 'Professeur' : 'Administrateur'}</p>
                       </div>
                       <Link 
-                        to="/profile" 
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <FiUser className="w-4 h-4" />
-                        Mon Profil
-                      </Link>
-                      <Link 
                         to={getDashboardLink()} 
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -239,7 +231,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                         Dashboard
                       </Link>
                       <Link 
-                        to="/settings" 
+                        to={`${getDashboardLink()}?tab=settings`} 
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       >

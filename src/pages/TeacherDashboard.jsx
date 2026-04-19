@@ -6,11 +6,13 @@ import {
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import AmazonNavbar from "../components/AmazonNavbar";
-import { getTeacherDashboard, createCourse, updateCourse, deleteCourse } from "../api/teacherApi";
+import { getTeacherDashboard, createCourse, updateCourse, deleteCourse, getTeacherAnalytics } from "../api/teacherApi";
 import AnalyticsView from "../components/AnalyticsView";
 import SettingsView from "../components/SettingsView";
 import ProfileComponent from "../components/ProfileComponent";
 import VideoPlayer from "../components/VideoPlayer";
+
+import { useSearchParams } from "react-router-dom";
 
 const sidebarItems = [
   { id: "dashboard", label: "Aperçu", icon: FiBarChart2 },
@@ -20,12 +22,31 @@ const sidebarItems = [
 ];
 
 export default function TeacherDashboard() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "dashboard";
+  
+  const [activeTab, setActiveTab] = useState(initialTab === "create" ? "courses" : initialTab);
   const [courses, setCourses] = useState([]);
   const [profile, setProfile] = useState({});
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(initialTab === "create");
   const [creationStep, setCreationStep] = useState(1);
   const [editingCourse, setEditingCourse] = useState(null);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "create") {
+      setActiveTab("courses");
+      setShowCreateModal(true);
+    } else if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
 
   const [form, setForm] = useState({
     title: "",
@@ -41,9 +62,13 @@ export default function TeacherDashboard() {
 
   const loadData = async () => {
     try {
-      const data = await getTeacherDashboard();
-      setCourses(data.courses || []);
-      setProfile(data.profile || {});
+      const [dashData, analytics] = await Promise.all([
+        getTeacherDashboard(),
+        getTeacherAnalytics()
+      ]);
+      setCourses(dashData.courses || []);
+      setProfile(dashData.profile || {});
+      setAnalyticsData(analytics);
     } catch (err) { console.error(err); }
   };
 
@@ -181,7 +206,7 @@ export default function TeacherDashboard() {
              {sidebarItems.map(item => {
                const Icon = item.icon;
                return (
-                 <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-50'}`}>
+                 <button key={item.id} onClick={() => handleTabChange(item.id)} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-50'}`}>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                        <Icon className="w-5 h-5" />
                        <span className="font-bold text-sm tracking-wide">{item.label}</span>
@@ -202,7 +227,7 @@ export default function TeacherDashboard() {
                  return (
                     <button 
                        key={item.id}
-                       onClick={() => setActiveTab(item.id)}
+                       onClick={() => handleTabChange(item.id)}
                        className={`flex flex-col items-center justify-center gap-1 min-w-[64px] transition-all ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}
                     >
                        <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
@@ -278,7 +303,11 @@ export default function TeacherDashboard() {
                   </motion.div>
                 )}
 
-                {activeTab === 'analytics' && <motion.div key="analytics" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><AnalyticsView courses={courses} /></motion.div>}
+                {activeTab === 'analytics' && (
+                  <motion.div key="analytics" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <AnalyticsView courses={courses} stats={analyticsData} />
+                  </motion.div>
+                )}
                 {activeTab === 'settings' && <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><SettingsView userProfile={profile} onProfileUpdate={setProfile} /></motion.div>}
              </AnimatePresence>
           </div>
