@@ -29,3 +29,8 @@ export const getCourseStats = async (courseId) => {
   const res = await api.get(`/course/${courseId}/stats`);
   return res.data;
 };
+// ✅ Récupérer les analytics globales du professeur
+export const getTeacherAnalytics = async () => {
+  const res = await api.get("/dashboard/teacher/analytics");
+  return res.data;
+};

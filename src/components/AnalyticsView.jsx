@@ -62,6 +62,37 @@ export default function AnalyticsView({ stats, courses = [] }) {
     { label: "Élèves Inscrits", value: totalStudents.toLocaleString(), change: stats?.studentGrowth ? `+${stats.studentGrowth}%` : "+0%", isPositive: true, icon: FiUsers, color: "indigo" },
   ];
 
+  const handleExport = () => {
+    if (!courses || courses.length === 0) {
+      alert("Aucune donnée à exporter");
+      return;
+    }
+
+    const headers = ["Titre", "Catégorie", "Prix", "Élèves", "Revenu"];
+    const rows = courses.map(c => [
+      c.title,
+      c.category || "N/A",
+      `${c.price}€`,
+      c.students?.length || 0,
+      `${(c.students?.length || 0) * (c.price || 0)}€`
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(r => r.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `analytics_elevated_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-10">
       {/* Header */}
@@ -71,7 +102,10 @@ export default function AnalyticsView({ stats, courses = [] }) {
           <p className="text-xs md:text-sm text-slate-500 font-medium italic">"Mesurez votre succès en temps réel."</p>
         </div>
         <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 self-start md:self-auto">
-           <button className="px-5 md:px-6 py-2 md:py-2.5 bg-emerald-600 text-white rounded-xl text-xs md:text-sm font-black shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center gap-2">
+           <button 
+             onClick={handleExport}
+             className="px-5 md:px-6 py-2 md:py-2.5 bg-emerald-600 text-white rounded-xl text-xs md:text-sm font-black shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center gap-2"
+           >
               <FiExternalLink /> Exporter
            </button>
         </div>
