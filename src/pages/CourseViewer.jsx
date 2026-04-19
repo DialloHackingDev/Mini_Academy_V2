@@ -36,10 +36,33 @@ export default function CourseViewer() {
   const fetchCourseDetails = async () => {
     try {
       const res = await api.get(`/course/${courseId}`);
-      if (res.data) {
-        setCourse(res.data);
-        if (res.data.modules?.length > 0) {
-          const firstModule = res.data.modules[0];
+      const courseData = res.data?.data || res.data;
+      
+      if (courseData) {
+        // If course has no modules but has content/files, create a virtual module
+        if (!courseData.modules || courseData.modules.length === 0) {
+          const virtualLesson = {
+            _id: 'virtual-lesson',
+            title: courseData.title,
+            description: courseData.description,
+            type: courseData.courseType,
+            content: courseData.content,
+            videoUrl: courseData.videoUrl,
+            videoFile: courseData.videoFile,
+            pdfFile: courseData.pdfFile,
+            duration: 10 // default
+          };
+          
+          courseData.modules = [{
+            _id: 'virtual-module',
+            title: 'Course Content',
+            lessons: [virtualLesson]
+          }];
+        }
+        
+        setCourse(courseData);
+        if (courseData.modules?.length > 0) {
+          const firstModule = courseData.modules[0];
           setActiveModule(firstModule);
           setExpandedModules([firstModule._id]);
           if (firstModule.lessons?.length > 0) {
