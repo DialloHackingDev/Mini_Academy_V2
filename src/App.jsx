@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import CertificatePage from "./pages/CertificatePage";
 
 export default function App() {
   return (
@@ -35,6 +36,12 @@ export default function App() {
         <Route path="/course-player/:courseId" element={
           <PrivateRoute allowedRoles={['eleve']}>
             <CourseViewer />
+          </PrivateRoute>
+        } />
+
+        <Route path="/certificate/:courseId" element={
+          <PrivateRoute allowedRoles={['eleve']}>
+            <CertificatePage />
           </PrivateRoute>
         } />
 

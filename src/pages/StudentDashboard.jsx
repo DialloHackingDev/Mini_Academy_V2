@@ -24,7 +24,8 @@ import { getMyCourses, getStudentAnalytics } from "../api/StudiantApi";
 import api from "../api/api";
 import AmazonNavbar from "../components/AmazonNavbar";
 import SettingsView from "../components/SettingsView";
-import AnalyticsView from "../components/AnalyticsView";
+import StudentAnalyticsView from "../components/StudentAnalyticsView";
+import ProgressView from "../components/ProgressView";
 import ProfileComponent from "../components/ProfileComponent";
 import { useAuth } from "../context/AuthContext";
 
@@ -32,6 +33,7 @@ import { useSearchParams } from "react-router-dom";
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: FiGrid },
+  { id: 'progress', label: 'Ma Progression', icon: FiPlayCircle },
   { id: 'mycourses', label: 'Mes Cours', icon: FiBook },
   { id: 'analytics', label: 'Analytique', icon: FiBarChart2 },
   { id: 'settings', label: 'Paramètres', icon: FiSettings },
@@ -44,6 +46,7 @@ export default function StudentDashboard() {
   const initialTab = searchParams.get("tab") || "dashboard";
   
   const [courses, setCourses] = useState([]);
+  const [progressions, setProgressions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [profile, setProfile] = useState(null);
@@ -74,7 +77,10 @@ export default function StudentDashboard() {
         getStudentAnalytics()
       ]);
 
-      if (coursesRes.status === 'fulfilled') setCourses(coursesRes.value.courses || coursesRes.value || []);
+      if (coursesRes.status === 'fulfilled') {
+        setCourses(coursesRes.value.courses || coursesRes.value || []);
+        setProgressions(coursesRes.value.progress || []);
+      }
       if (profileRes.status === 'fulfilled') setProfile(profileRes.value.data.user || profileRes.value.data);
       if (analyticsRes.status === 'fulfilled') setAnalytics(analyticsRes.value);
     } catch (err) {
@@ -88,6 +94,10 @@ export default function StudentDashboard() {
     localStorage.clear();
     navigate('/login');
   };
+
+  const enrolledCount = courses.length;
+  const inProgressCount = progressions.filter(p => p.progression > 0 && p.progression < 100).length;
+  const certificatesCount = progressions.filter(p => p.certificateEarned).length;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -205,7 +215,7 @@ export default function StudentDashboard() {
                            <FiBook className="w-8 h-8" />
                         </div>
                         <div>
-                           <p className="text-3xl font-black text-slate-900">{courses.length}</p>
+                           <p className="text-3xl font-black text-slate-900">{enrolledCount}</p>
                            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Cours inscrits</p>
                         </div>
                      </div>
@@ -214,7 +224,7 @@ export default function StudentDashboard() {
                            <FiPlayCircle className="w-8 h-8" />
                         </div>
                         <div>
-                           <p className="text-3xl font-black text-slate-900">4</p>
+                           <p className="text-3xl font-black text-slate-900">{inProgressCount}</p>
                            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">En cours</p>
                         </div>
                      </div>
@@ -223,7 +233,7 @@ export default function StudentDashboard() {
                            <FaCertificate className="w-8 h-8" />
                         </div>
                         <div>
-                           <p className="text-3xl font-black text-slate-900">2</p>
+                           <p className="text-3xl font-black text-slate-900">{certificatesCount}</p>
                            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Certificats</p>
                         </div>
                      </div>
@@ -239,7 +249,9 @@ export default function StudentDashboard() {
                     </div>
                     
                     <div className="grid md:grid-cols-2 gap-8">
-                      {courses.slice(0, 2).map((course) => (
+                      {courses.slice(0, 2).map((course) => {
+                        const prog = progressions.find(p => p.courseId === course._id) || { progression: 0, certificateEarned: false };
+                        return (
                         <div key={course._id} className="bg-white rounded-[32px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all group">
                            <div className="relative h-48 overflow-hidden">
                               <img 
@@ -250,32 +262,40 @@ export default function StudentDashboard() {
                               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                               <div className="absolute bottom-6 left-6 right-6">
                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest">{course.category || 'Developpement'}</span>
+                                    <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest">{course.category || 'Développement'}</span>
                                  </div>
                                  <h3 className="text-xl font-bold text-white leading-tight">{course.title}</h3>
                               </div>
                            </div>
                            <div className="p-8">
                               <div className="flex items-center justify-between mb-4">
-                                 <div className="flex -space-x-2">
-                                    {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200"></div>)}
-                                    <div className="w-8 h-8 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-[10px] font-bold text-emerald-700">+12</div>
-                                 </div>
-                                 <p className="text-xs font-bold text-slate-500">65% Terminé</p>
+                                 <p className="text-xs font-bold text-slate-500">{prog.progression}% Terminé</p>
                               </div>
                               <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-8">
-                                 <div className="h-full bg-emerald-500 rounded-full" style={{ width: '65%' }}></div>
+                                 <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${prog.progression}%` }}></div>
                               </div>
-                              <Link 
-                                to={`/course-player/${course._id}`}
-                                className="w-full py-4 bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-3"
-                              >
-                                <FiPlayCircle className="w-5 h-5" />
-                                Continuer la leçon
-                              </Link>
+                              <div className="flex gap-2">
+                                <Link 
+                                  to={`/course-player/${course._id}`}
+                                  className="flex-1 py-4 bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2"
+                                >
+                                  <FiPlayCircle className="w-5 h-5" />
+                                  Continuer
+                                </Link>
+                                {prog.certificateEarned && (
+                                  <Link 
+                                    to={`/certificate/${course._id}`}
+                                    className="px-4 py-4 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-2xl font-black text-sm transition-all flex items-center justify-center"
+                                    title="Voir mon certificat"
+                                  >
+                                    <FaCertificate className="w-5 h-5" />
+                                  </Link>
+                                )}
+                              </div>
                            </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </motion.div>
@@ -317,9 +337,15 @@ export default function StudentDashboard() {
                 </motion.div>
               )}
 
+              {activeTab === 'progress' && (
+                <motion.div key="progress" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full">
+                  <ProgressView courses={courses} progressions={progressions} />
+                </motion.div>
+              )}
+
               {activeTab === 'analytics' && (
                 <motion.div key="analytics" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <AnalyticsView />
+                  <StudentAnalyticsView stats={analytics} />
                 </motion.div>
               )}
 

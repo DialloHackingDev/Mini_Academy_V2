@@ -15,10 +15,13 @@ import {
   FiMaximize2
 } from "react-icons/fi";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { FaCertificate } from "react-icons/fa";
 import api from "../api/api";
 import AmazonNavbar from "../components/AmazonNavbar";
+import { useAuth } from "../context/AuthContext";
 
 export default function CourseViewer() {
+  const { user } = useAuth();
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
@@ -28,10 +31,28 @@ export default function CourseViewer() {
   const [loading, setLoading] = useState(true);
   const [expandedModules, setExpandedModules] = useState([]);
   const [completedLessons, setCompletedLessons] = useState([]);
+  const [certificateEarned, setCertificateEarned] = useState(false);
 
   useEffect(() => {
     fetchCourseDetails();
+    fetchProgression();
   }, [courseId]);
+
+  const fetchProgression = async () => {
+    try {
+      if (user?.token && courseId) {
+        const res = await api.get(`/progress/${courseId}`);
+        if (res.data?.success && res.data?.data) {
+           const prog = res.data.data;
+           const completedIds = prog.completedLessons?.map(cl => cl.lessonId) || [];
+           setCompletedLessons(completedIds);
+           setCertificateEarned(prog.certificateEarned || false);
+        }
+      }
+    } catch (err) {
+      console.log("No progression found or error fetching:", err);
+    }
+  };
 
   const fetchCourseDetails = async () => {
     try {
@@ -83,10 +104,24 @@ export default function CourseViewer() {
     );
   };
 
-  const toggleLessonCompletion = (lessonId) => {
-    setCompletedLessons(prev => 
-      prev.includes(lessonId) ? prev.filter(id => id !== lessonId) : [...prev, lessonId]
-    );
+  const toggleLessonCompletion = async (lessonId) => {
+    try {
+      // Optmistic UI Update
+      setCompletedLessons(prev => 
+        prev.includes(lessonId) ? prev.filter(id => id !== lessonId) : [...prev, lessonId]
+      );
+      
+      // Save to backend
+      const isCompleting = !completedLessons.includes(lessonId);
+      if (isCompleting && user?.token) {
+        const res = await api.post(`/progress/${courseId}/${lessonId}`, { timeSpent: 0, score: 100 });
+        if (res.data?.success) {
+           setCertificateEarned(res.data.data.certificateEarned);
+        }
+      }
+    } catch (err) {
+      console.error("Error saving progress:", err);
+    }
   };
 
   if (loading) return (
@@ -137,6 +172,18 @@ export default function CourseViewer() {
                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progressPercent}%` }}></div>
                  </div>
                </div>
+               
+               {/* Certificate Button */}
+               {(certificateEarned || progressPercent === 100) && (
+                 <Link 
+                   to={`/certificate/${courseId}`} 
+                   className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 px-4 py-2 rounded-lg text-sm font-black hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg shadow-amber-500/20"
+                 >
+                   <FaCertificate className="w-4 h-4" />
+                   Certificat
+                 </Link>
+               )}
+
                <button className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-all">
                  <FiMaximize2 className="w-4 h-4" />
                  Full Screen
