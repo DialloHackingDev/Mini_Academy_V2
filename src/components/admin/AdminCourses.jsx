@@ -9,6 +9,7 @@ const initialCourseForm = {
   courseType: "video",
   price: "",
   coverImage: null,
+  previewVideoUrl: "",
   modules: [{ title: "", lessons: [{ title: "", type: "video", sourceMode: "link", videoUrl: "", content: "", file: null }] }]
 };
 
@@ -92,6 +93,10 @@ export default function AdminCourses({ courses = [], onDelete, onRefresh }) {
 
       if (createForm.coverImage) {
         formData.append("coverImage", createForm.coverImage);
+      }
+
+      if (createForm.previewVideoUrl && createForm.previewVideoUrl.trim()) {
+        formData.append("previewVideoUrl", createForm.previewVideoUrl.trim());
       }
 
       // Filtrer les modules et leçons valides (avec titre)
@@ -262,6 +267,10 @@ export default function AdminCourses({ courses = [], onDelete, onRefresh }) {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Description</label>
                     <textarea value={createForm.description || ""} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} className="w-full p-4 md:p-5 bg-slate-50 rounded-2xl outline-none font-bold h-32" placeholder="Décrivez votre cours..." />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">URL Vidéo de Présentation (YouTube, Vimeo, etc.)</label>
+                    <input type="url" value={createForm.previewVideoUrl || ""} onChange={(e) => setCreateForm({ ...createForm, previewVideoUrl: e.target.value })} className="w-full p-4 md:p-5 bg-slate-50 rounded-2xl outline-none font-bold" placeholder="https://www.youtube.com/embed/..." />
                   </div>
                   <button onClick={() => setCreationStep(2)} className="w-full py-4 md:py-5 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all">Suivant: Modules & Leçons <FiChevronRight /></button>
                 </div>

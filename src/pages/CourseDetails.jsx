@@ -38,6 +38,8 @@ export default function CourseDetails() {
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [sectionsExpanded, setSectionsExpanded] = useState(false);
   const token = localStorage.getItem("token");
 
   // Load cart from localStorage
@@ -45,6 +47,9 @@ export default function CourseDetails() {
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
     const isInCart = savedCart.some(item => item._id === id);
     setAddedToCart(isInCart);
+
+    const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    setWishlisted(savedWishlist.some(item => item._id === id));
   }, [id]);
 
   useEffect(() => {
@@ -92,10 +97,15 @@ export default function CourseDetails() {
       return;
     }
 
+    if (isEnrolled) {
+      navigate(`/course-player/${course._id}`);
+      return;
+    }
+
     try {
       await enrollCourse(course._id);
       setIsEnrolled(true);
-      alert("Successfully enrolled! You can now access the course content.");
+      navigate(`/course-player/${course._id}`);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message;
       if (errorMessage.includes("Token")) {
@@ -103,6 +113,7 @@ export default function CourseDetails() {
         navigate('/login');
       } else if (errorMessage.includes("Already enrolled")) {
         setIsEnrolled(true);
+        navigate(`/course-player/${course._id}`);
       } else {
         alert("Error: " + errorMessage);
       }
@@ -148,6 +159,104 @@ export default function CourseDetails() {
     alert('Cours ajouté au panier !');
   };
 
+  const getFirstVideoLesson = () => {
+    if (!course?.modules?.length) return null;
+    const allLessons = course.modules.flatMap(module => module.lessons || []);
+    return allLessons.find(lesson => lesson.type === 'video' || lesson.videoUrl || lesson.videoFile?.filename);
+  };
+
+  const getPreviewVideoSource = () => {
+    const lesson = getFirstVideoLesson();
+    if (course?.previewVideoUrl) {
+      return {
+        type: 'external',
+        src: course.previewVideoUrl
+      };
+    }
+
+    if (lesson?.videoFile?.filename) {
+      return {
+        type: 'file',
+        src: `http://localhost:5000/uploads/videos/${lesson.videoFile.filename}`
+      };
+    }
+
+    if (lesson?.videoUrl) {
+      return {
+        type: 'external',
+        src: lesson.videoUrl
+      };
+    }
+
+    return null;
+  };
+
+  const getFullVideoSource = () => {
+    if (course?.videoFile?.filename) {
+      return {
+        type: 'file',
+        src: `http://localhost:5000/uploads/videos/${course.videoFile.filename}`
+      };
+    }
+
+    if (course?.videoUrl) {
+      return {
+        type: 'external',
+        src: course.videoUrl
+      };
+    }
+
+    return null;
+  };
+
+  const getCourseDuration = () => {
+    const minutes = course?.modules?.reduce((moduleTotal, module) => {
+      return moduleTotal + (module.lessons?.reduce((lessonTotal, lesson) => lessonTotal + (Number(lesson.duration) || 0), 0) || 0);
+    }, 0) || 0;
+
+    if (minutes > 0) {
+      return `${Math.ceil(minutes / 60)} hours`;
+    }
+
+    const lessons = course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 1;
+    return `${Math.max(1, lessons * 5)} hours`;
+  };
+
+  const getArticleCount = () => course?.modules?.reduce((total, module) => total + (module.lessons?.filter(lesson => lesson.type === 'text').length || 0), 0) || 0;
+  const getResourceCount = () => course?.modules?.reduce((total, module) => total + (module.lessons?.filter(lesson => lesson.type === 'pdf' || lesson.pdfFile?.filename).length || 0), 0) || 0;
+  const getTotalLessons = () => course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 0;
+  const getModuleCount = () => course?.modules?.length || 0;
+
+  const handleWishlist = () => {
+    if (!course) return;
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    if (wishlist.some(item => item._id === course._id)) {
+      alert('Ce cours est déjà dans votre wishlist.');
+      return;
+    }
+    const updated = [...wishlist, { _id: course._id, title: course.title, price: course.price, coverImage: course.coverImage }];
+    localStorage.setItem('wishlist', JSON.stringify(updated));
+    setWishlisted(true);
+    alert('Cours ajouté à la wishlist !');
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert('Lien du cours copié !');
+    } catch (err) {
+      alert('Impossible de copier le lien. Merci de le copier manuellement.');
+    }
+  };
+
+  const toggleExpandSections = () => {
+    setSectionsExpanded(prev => !prev);
+  };
+
+  const previewVideoSource = getPreviewVideoSource();
+  const fullVideoSource = getFullVideoSource();
+  const previewVideoTitle = getFirstVideoLesson()?.title || course?.title || 'Course preview';
 
   if (loading) {
     return (
@@ -249,7 +358,22 @@ export default function CourseDetails() {
             {/* Video Preview Card (Mobile) */}
             <div className="lg:hidden">
               <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden relative">
-                {course.coverImage ? (
+                {previewVideoSource?.type === 'file' ? (
+                  <VideoPlayer
+                    src={previewVideoSource.src}
+                    title={previewVideoTitle}
+                    className="w-full h-full"
+                  />
+                ) : previewVideoSource?.type === 'external' ? (
+                  <iframe
+                    src={previewVideoSource.src}
+                    title={`${previewVideoTitle} - Preview`}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : course.coverImage ? (
                   <img 
                     src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`}
                     alt={course.title}
@@ -268,6 +392,11 @@ export default function CourseDetails() {
                       <FiBookOpen className="w-16 h-16 text-white/80" />
                     )}
                   </>
+                )}
+                {previewVideoSource && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/40 p-3 text-white text-sm">
+                    Preview: {previewVideoTitle}
+                  </div>
                 )}
               </div>
             </div>
@@ -297,11 +426,47 @@ export default function CourseDetails() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-900">Course content</h2>
-                <button className="text-indigo-600 text-sm font-medium hover:underline">
-                  Expand all sections
+                <button onClick={toggleExpandSections} className="text-indigo-600 text-sm font-medium hover:underline">
+                  {sectionsExpanded ? 'Collapse all sections' : 'Expand all sections'}
                 </button>
               </div>
-              
+              <div className="mb-4 text-sm text-slate-500">
+                {getModuleCount()} sections • {getTotalLessons()} lessons • {getCourseDuration()}
+              </div>
+
+              {course.modules?.length > 0 && (
+                <div className="space-y-4 mb-6">
+                  {course.modules.map((module, mIdx) => (
+                    <div key={mIdx} className="rounded-3xl border border-slate-200 bg-white p-5">
+                      <div className="flex items-center justify-between gap-4 mb-3">
+                        <div>
+                          <p className="text-slate-500 text-sm">Section {mIdx + 1}</p>
+                          <h3 className="font-semibold text-slate-900">{module.title || `Module ${mIdx + 1}`}</h3>
+                        </div>
+                        <span className="text-sm text-slate-500">{module.lessons?.length || 0} lessons</span>
+                      </div>
+                      {sectionsExpanded && module.lessons?.length > 0 && (
+                        <div className="space-y-2">
+                          {module.lessons.map((lesson, lIdx) => (
+                            <div key={lIdx} className="rounded-2xl border border-slate-100 p-4 bg-slate-50">
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <p className="font-semibold text-slate-900">{lesson.title || `Leçon ${lIdx + 1}`}</p>
+                                  <p className="text-slate-500 text-sm">
+                                    {lesson.type === 'video' ? 'Video lesson' : lesson.type === 'pdf' ? 'PDF lesson' : 'Text lesson'}
+                                  </p>
+                                </div>
+                                <span className="text-sm text-slate-500">{lesson.duration ? `${lesson.duration} min` : '—'}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Dynamic content based on course type */}
               {course.courseType === 'video' && (
                 <div className="bg-slate-50 rounded-lg p-6">
@@ -316,18 +481,37 @@ export default function CourseDetails() {
                   </div>
                   
                   {/* Show video if available and enrolled/free */}
-                  {(course.price === 0 || isEnrolled) && token && course.videoFile?.filename ? (
-                    <VideoPlayer
-                      src={`http://localhost:5000/uploads/videos/${course.videoFile.filename}`}
-                      title={course.title}
-                      className="h-[400px] rounded-lg"
-                    />
-                  ) : course.videoUrl && (course.price === 0 || isEnrolled) && token ? (
-                    <VideoPlayer
-                      src={course.videoUrl}
-                      title={course.title}
-                      className="h-[400px] rounded-lg"
-                    />
+                  {(course.price === 0 || isEnrolled) && token && fullVideoSource ? (
+                    fullVideoSource.type === 'file' ? (
+                      <VideoPlayer
+                        src={fullVideoSource.src}
+                        title={course.title}
+                        className="h-[400px] rounded-lg"
+                      />
+                    ) : (
+                      <VideoPlayer
+                        src={fullVideoSource.src}
+                        title={course.title}
+                        className="h-[400px] rounded-lg"
+                      />
+                    )
+                  ) : previewVideoSource ? (
+                    previewVideoSource.type === 'file' ? (
+                      <VideoPlayer
+                        src={previewVideoSource.src}
+                        title={previewVideoTitle}
+                        className="h-[400px] rounded-lg"
+                      />
+                    ) : (
+                      <iframe
+                        src={previewVideoSource.src}
+                        title={`${previewVideoTitle} - Preview`}
+                        className="w-full h-[400px] rounded-lg"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    )
                   ) : (
                     <div className="bg-slate-200 rounded-lg aspect-video flex items-center justify-center">
                       <div className="text-center">
@@ -407,6 +591,16 @@ export default function CourseDetails() {
               <h2 className="text-xl font-bold text-slate-900 mb-4">Description</h2>
               <div className="prose prose-slate max-w-none text-slate-700">
                 <p>{course.content || course.description}</p>
+                {course.learningObjectives && course.learningObjectives.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="font-semibold mb-2">Learning Objectives:</h3>
+                    <ul className="list-disc list-inside space-y-1">
+                      {course.learningObjectives.map((obj, i) => (
+                        <li key={i}>{obj}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <p className="mt-4">
                   This comprehensive course will take you from beginner to advanced level.
                   You'll learn through practical examples and real-world projects.
@@ -425,19 +619,19 @@ export default function CourseDetails() {
                   <Link to="#" className="text-indigo-600 font-semibold hover:underline">
                     {course.professor?.username || 'Alex Instructor'}
                   </Link>
-                  <p className="text-slate-500 text-sm mb-2">Senior Developer & Instructor</p>
+                  <p className="text-slate-500 text-sm mb-2">{course.professor?.jobTitle || 'Senior Developer & Instructor'}</p>
                   <div className="flex items-center gap-4 text-sm text-slate-600">
                     <span className="flex items-center gap-1">
                       <FiStar className="w-4 h-4 text-amber-500" />
-                      4.5 Instructor Rating
+                      {course.professor?.rating || '4.5'} Instructor Rating
                     </span>
                     <span className="flex items-center gap-1">
                       <FiUsers className="w-4 h-4" />
-                      12,356 Students
+                      {course.professor?.studentsCount || '12,356'} Students
                     </span>
                     <span className="flex items-center gap-1">
                       <FiPlayCircle className="w-4 h-4" />
-                      22 Courses
+                      {course.professor?.coursesCount || '22'} Courses
                     </span>
                   </div>
                   <p className="text-slate-600 mt-3 text-sm leading-relaxed">
@@ -531,7 +725,22 @@ export default function CourseDetails() {
             <div className="lg:sticky lg:top-4 space-y-4">
               {/* Course Preview - Cover Image or Video */}
               <div className="hidden lg:block aspect-video bg-slate-900 rounded-lg overflow-hidden relative group cursor-pointer">
-                {course.coverImage ? (
+                {previewVideoSource?.type === 'file' ? (
+                  <VideoPlayer
+                    src={previewVideoSource.src}
+                    title={previewVideoTitle}
+                    className="w-full h-full"
+                  />
+                ) : previewVideoSource?.type === 'external' ? (
+                  <iframe
+                    src={previewVideoSource.src}
+                    title={`${previewVideoTitle} - Preview`}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : course.coverImage ? (
                   <>
                     <img 
                       src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`}
@@ -558,6 +767,11 @@ export default function CourseDetails() {
                       <p className="text-white text-sm font-medium">Preview this course</p>
                     </div>
                   </>
+                )}
+                {previewVideoSource && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/40 p-3 text-white text-sm">
+                    Preview: {previewVideoTitle}
+                  </div>
                 )}
               </div>
 
@@ -683,19 +897,15 @@ export default function CourseDetails() {
                   <p className="font-medium text-slate-900">This course includes:</p>
                   <div className="flex items-center gap-2 text-slate-600">
                     <FiPlayCircle className="w-4 h-4" />
-                    <span>5 hours on-demand video</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <FiFileText className="w-4 h-4" />
-                    <span>15 articles</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <FiDownload className="w-4 h-4" />
-                    <span>25 downloadable resources</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <FiGlobe className="w-4 h-4" />
-                    <span>Full lifetime access</span>
+                      <span>{getCourseDuration()} on-demand video</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <FiFileText className="w-4 h-4" />
+                      <span>{getArticleCount()} articles</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <FiDownload className="w-4 h-4" />
+                      <span>{getResourceCount()} downloadable resources</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-600">
                     <FiAward className="w-4 h-4" />
@@ -705,11 +915,11 @@ export default function CourseDetails() {
 
                 {/* Actions */}
                 <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
-                  <button className="flex-1 flex items-center justify-center gap-2 py-2 border border-slate-300 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
+                  <button onClick={handleWishlist} className={`flex-1 flex items-center justify-center gap-2 py-2 border rounded transition-colors text-sm font-medium ${wishlisted ? 'bg-emerald-600 text-white border-emerald-600' : 'border-slate-300 hover:bg-slate-50 text-slate-900'}`}>
                     <FiHeart className="w-4 h-4" />
-                    Wishlist
+                    {wishlisted ? 'In wishlist' : 'Wishlist'}
                   </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 py-2 border border-slate-300 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
+                  <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 py-2 border border-slate-300 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
                     <FiShare2 className="w-4 h-4" />
                     Share
                   </button>

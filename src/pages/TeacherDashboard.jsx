@@ -314,7 +314,7 @@ export default function TeacherDashboard() {
                   {courses.map(course => (
                     <div key={course._id} className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 hover:-translate-y-2">
                        <div className="relative aspect-video overflow-hidden">
-                          <img src={course.coverImage ? `http://localhost:5000/uploads/${course.coverImage}` : "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800"} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                          <img src={course.coverImage?.filename ? `http://localhost:5000/uploads/covers/${course.coverImage.filename}` : "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800"} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase text-emerald-600 tracking-tighter shadow-sm">{course.category}</div>
                        </div>
