@@ -20,12 +20,15 @@ import {
   FiPlayCircle,
   FiBookOpen,
   FiVideo,
+  FiSend,
 } from "react-icons/fi";
 import { getCourseById, enrollCourse } from "../api/courApi";
 import { getCourses } from "../api/courApi";
 import { useAuth } from "../context/AuthContext";
 import VideoPlayer from "../components/VideoPlayer";
 import PDFReader from "../components/PDFReader";
+import { toggleFavorite, checkIsFavored } from "../api/favoriteApi";
+import { addOrUpdateReview, getCourseReviews } from "../api/reviewApi";
 
 export default function CourseDetails() {
   const { id } = useParams();
@@ -39,7 +42,12 @@ export default function CourseDetails() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  const [isFavored, setIsFavored] = useState(false);
   const [sectionsExpanded, setSectionsExpanded] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
   const token = localStorage.getItem("token");
 
   // Load cart from localStorage
@@ -89,6 +97,34 @@ export default function CourseDetails() {
     };
     fetchRelated();
   }, [id]);
+
+  // Fetch reviews and check if favored
+  useEffect(() => {
+    if (id && token) {
+      fetchReviews();
+      checkIfFavored();
+    }
+  }, [id, token]);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await getCourseReviews(id);
+      setReviews(res.reviews || []);
+      setAvgRating(parseFloat(res.avgRating) || 0);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
+
+  const checkIfFavored = async () => {
+    try {
+      if (!token) return;
+      const res = await checkIsFavored(id);
+      setIsFavored(res.isFavored || false);
+    } catch (error) {
+      console.error("Error checking favorite status:", error);
+    }
+  };
 
   const handleEnroll = async () => {
     if (!user || !token) {
@@ -254,6 +290,51 @@ export default function CourseDetails() {
     setSectionsExpanded(prev => !prev);
   };
 
+  const handleToggleFavorite = async () => {
+    if (!token) {
+      alert("Vous devez être connecté pour ajouter aux favoris.");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const res = await toggleFavorite(id);
+      setIsFavored(res.isFavored);
+      alert(res.message);
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      alert("Erreur lors de l'ajout aux favoris");
+    }
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    
+    if (!token) {
+      alert("Vous devez être connecté pour donner un avis.");
+      navigate('/login');
+      return;
+    }
+
+    if (!newReview.comment.trim()) {
+      alert("Veuillez écrire un commentaire");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      await addOrUpdateReview(id, newReview.rating, newReview.comment);
+      setNewReview({ rating: 5, comment: '' });
+      alert('Avis enregistré avec succès !');
+      fetchReviews();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Erreur lors de l'enregistrement de l'avis");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const previewVideoSource = getPreviewVideoSource();
   const fullVideoSource = getFullVideoSource();
   const previewVideoTitle = getFirstVideoLesson()?.title || course?.title || 'Course preview';
@@ -296,7 +377,7 @@ export default function CourseDetails() {
 
   // Use real course stats if available, otherwise defaults
   const courseStats = course.stats || {};
-  const avgRating = courseStats.averageRating || 4.5;
+  const courseAvgRating = courseStats.averageRating || 4.5;
   const totalReviews = courseStats.totalReviews || 598;
   const totalStudents = courseStats.totalStudents || course.students?.length || 3714;
 
@@ -324,7 +405,7 @@ export default function CourseDetails() {
               <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
                 <span className="flex items-center gap-1 text-amber-400">
                   <FiStar className="fill-current" />
-                  <span className="font-bold">{avgRating}</span>
+                  <span className="font-bold">{courseAvgRating}</span>
                   <span className="text-slate-400">({totalReviews} ratings)</span>
                 </span>
                 <span className="text-slate-400">{totalStudents.toLocaleString()} students</span>
@@ -686,6 +767,53 @@ export default function CourseDetails() {
                   <p>No reviews yet. Be the first to review this course!</p>
                 </div>
               )}
+
+              {/* Submit Review Form */}
+              {isEnrolled && token && (
+                <div className="mt-8 pt-8 border-t border-slate-200">
+                  <h3 className="text-lg font-bold text-slate-900 mb-4">Donnez votre avis</h3>
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Note (1-5 étoiles)
+                      </label>
+                      <select
+                        value={newReview.rating}
+                        onChange={(e) => setNewReview({ ...newReview, rating: parseInt(e.target.value) })}
+                        className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                      >
+                        <option value="5">5 étoiles - Excellent</option>
+                        <option value="4">4 étoiles - Très bon</option>
+                        <option value="3">3 étoiles - Correct</option>
+                        <option value="2">2 étoiles - Acceptable</option>
+                        <option value="1">1 étoile - Pauvre</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Votre avis
+                      </label>
+                      <textarea
+                        value={newReview.comment}
+                        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                        placeholder="Partagez votre expérience avec ce cours..."
+                        rows="4"
+                        className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submittingReview}
+                      className="flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                    >
+                      <FiSend className="w-4 h-4" />
+                      {submittingReview ? 'Envoi en cours...' : 'Publier votre avis'}
+                    </button>
+                  </form>
+                </div>
+              )}
             </section>
 
             {/* Related Courses */}
@@ -915,6 +1043,13 @@ export default function CourseDetails() {
 
                 {/* Actions */}
                 <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
+                  <button 
+                    onClick={handleToggleFavorite} 
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 border rounded transition-colors text-sm font-medium ${isFavored ? 'bg-red-600 text-white border-red-600' : 'border-slate-300 hover:bg-slate-50 text-slate-900'}`}
+                  >
+                    <FiHeart className={`w-4 h-4 ${isFavored ? 'fill-current' : ''}`} />
+                    {isFavored ? 'Favoris' : 'Favoriser'}
+                  </button>
                   <button onClick={handleWishlist} className={`flex-1 flex items-center justify-center gap-2 py-2 border rounded transition-colors text-sm font-medium ${wishlisted ? 'bg-emerald-600 text-white border-emerald-600' : 'border-slate-300 hover:bg-slate-50 text-slate-900'}`}>
                     <FiHeart className="w-4 h-4" />
                     {wishlisted ? 'In wishlist' : 'Wishlist'}

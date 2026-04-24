@@ -13,18 +13,24 @@ import {
   FiSettings,
   FiPlusCircle,
   FiBell,
-  FiHeart
+  FiHeart,
+  FiCheck,
+  FiTrash2
 } from "react-icons/fi";
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { getMyNotifications, markNotificationAsRead, deleteNotification } from "../api/notificationApi";
 
 export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [searchInput, setSearchInput] = useState(searchValue);
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,14 +51,49 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
     
     // Check for changes every second to keep synced across components
     const interval = setInterval(updateCount, 1000);
-    
-    // Simulate notifications (in real app, fetch from API)
-    if (token) {
-      setNotificationCount(3); // Example: 3 unread notifications
-    }
 
     return () => clearInterval(interval);
   }, [token]);
+
+  // Fetch notifications when token is available
+  useEffect(() => {
+    if (token && notificationsOpen) {
+      fetchNotifications();
+    }
+  }, [token, notificationsOpen]);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoadingNotifications(true);
+      const res = await getMyNotifications(1, 10, true); // Fetch unread notifications
+      setNotifications(res.notifications || []);
+      setNotificationCount(res.unreadCount || 0);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      setNotifications(notifications.filter(n => n._id !== notificationId));
+      setNotificationCount(Math.max(0, notificationCount - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await deleteNotification(notificationId);
+      setNotifications(notifications.filter(n => n._id !== notificationId));
+      setNotificationCount(Math.max(0, notificationCount - 1));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
 
   // Update search input when prop changes
   useEffect(() => {
@@ -201,14 +242,72 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                 )}
 
                 {/* Notifications */}
-                <button className="relative hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors">
-                  <FiBell className="w-6 h-6" />
-                  {notificationCount > 0 && (
-                    <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
-                      {notificationCount > 9 ? '9+' : notificationCount}
-                    </span>
+                <div className="relative">
+                  <button 
+                    onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    className="relative hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
+                  >
+                    <FiBell className="w-6 h-6" />
+                    {notificationCount > 0 && (
+                      <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
+                        {notificationCount > 9 ? '9+' : notificationCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Notifications Dropdown */}
+                  {notificationsOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
+                    >
+                      <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 rounded-t-xl">
+                        <p className="text-sm font-semibold text-gray-900">Notifications</p>
+                      </div>
+                      
+                      {loadingNotifications ? (
+                        <div className="px-4 py-8 text-center">
+                          <p className="text-sm text-gray-500">Chargement...</p>
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div className="px-4 py-8 text-center">
+                          <p className="text-sm text-gray-500">Aucune notification</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-100">
+                          {notifications.map(notif => (
+                            <div key={notif._id} className="px-4 py-3 hover:bg-gray-50 transition-colors flex gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-gray-900 break-words">{notif.message}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {new Date(notif.date).toLocaleDateString('fr-FR')}
+                                </p>
+                              </div>
+                              <div className="flex items-start gap-1 ml-2">
+                                <button
+                                  onClick={() => handleMarkAsRead(notif._id)}
+                                  className="text-emerald-600 hover:text-emerald-700 p-1"
+                                  title="Marquer comme lu"
+                                >
+                                  <FiCheck className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteNotification(notif._id)}
+                                  className="text-red-600 hover:text-red-700 p-1"
+                                  title="Supprimer"
+                                >
+                                  <FiTrash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
                   )}
-                </button>
+                </div>
 
                 {/* Wishlist */}
                 <Link to="/wishlist" className="hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors">
