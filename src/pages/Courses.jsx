@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { FaGraduationCap } from "react-icons/fa";
 import AmazonNavbar from "../components/AmazonNavbar.jsx";
+import { useAuth } from "../context/AuthContext";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -27,6 +28,8 @@ export default function Courses() {
   const [showFilters, setShowFilters] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [addedToCart, setAddedToCart] = useState({});
+  const { user } = useAuth();
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   // Load cart from localStorage
@@ -36,6 +39,11 @@ export default function Courses() {
   }, []);
 
   const addToCart = (course) => {
+    if (!token || !user) {
+      alert("Vous devez être connecté pour ajouter un cours au panier.");
+      navigate('/login');
+      return;
+    }
     const existingItem = cartItems.find(item => item._id === course._id);
     if (existingItem) {
       // Item already in cart, show feedback

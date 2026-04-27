@@ -20,7 +20,9 @@ import {
   FiRefreshCw
 } from "react-icons/fi";
 import { FaGraduationCap, FaPaypal, FaApple, FaGooglePay } from "react-icons/fa";
+import logo from "../assets/log.svg";
 import AmazonNavbar from "../components/AmazonNavbar";
+import { useAuth } from "../context/AuthContext";
 
 import { getCourses } from "../api/courApi";
 import api from "../api/api";
@@ -39,6 +41,8 @@ export default function Cart() {
   const [discount, setDiscount] = useState(0);
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
+  const { user } = useAuth();
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   // Load recommendations on mount
@@ -92,6 +96,11 @@ export default function Cart() {
   };
 
   const addToCart = (course) => {
+    if (!token || !user) {
+      alert("Vous devez être connecté pour ajouter un cours au panier.");
+      navigate('/login');
+      return;
+    }
     const existingItem = cartItems.find(item => item._id === course._id);
     if (existingItem) {
       updateQuantity(course._id, 1);
@@ -133,6 +142,11 @@ export default function Cart() {
   ) + discountAmount;
 
   const handlePayment = async () => {
+    if (!token || !user) {
+      alert("Vous devez être connecté pour effectuer un achat.");
+      navigate('/login');
+      return;
+    }
     setIsProcessing(true);
     
     try {
@@ -292,8 +306,8 @@ export default function Cart() {
                       <div className="p-6">
                         <div className="flex gap-6">
                           {/* Course Image */}
-                          <div className="w-32 h-24 bg-gradient-to-br from-emerald-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FaGraduationCap className="w-10 h-10 text-emerald-400" />
+                          <div className="w-32 h-24 flex items-center justify-center flex-shrink-0">
+                            <img src={logo} alt="Logo" className="w-16 h-16 object-contain" />
                           </div>
 
                           {/* Course Info */}
@@ -465,11 +479,11 @@ export default function Cart() {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <div className="h-40 bg-gradient-to-br from-emerald-100 to-purple-100 flex items-center justify-center overflow-hidden">
+                    <div className="h-40 flex items-center justify-center overflow-hidden">
                       {course.coverImage ? (
                         <img src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`} className="w-full h-full object-cover" alt="" />
                       ) : (
-                        <FaGraduationCap className="w-12 h-12 text-emerald-400" />
+                        <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
                       )}
                     </div>
                     <div className="p-4">

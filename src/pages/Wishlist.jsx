@@ -15,12 +15,15 @@ import {
 } from "react-icons/fi";
 import AmazonNavbar from "../components/AmazonNavbar.jsx";
 import { getUserFavorites } from "../api/favoriteApi";
+import { useAuth } from "../context/AuthContext";
 
 export default function Wishlist() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addedToCart, setAddedToCart] = useState({});
+  const { user } = useAuth();
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   const getCourseCoverUrl = (course) => {
@@ -75,10 +78,19 @@ export default function Wishlist() {
       }
     };
 
+    if (!token || !user) {
+      navigate('/login');
+      return;
+    }
     fetchFavorites();
-  }, []);
+  }, [token, user, navigate]);
 
   const addToCart = (course) => {
+    if (!token || !user) {
+      alert("Vous devez être connecté pour ajouter un cours au panier.");
+      navigate('/login');
+      return;
+    }
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItem = savedCart.find(item => item._id === course._id);
     

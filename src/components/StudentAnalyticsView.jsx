@@ -8,6 +8,7 @@ import {
   FiBook
 } from "react-icons/fi";
 import { FaGraduationCap } from "react-icons/fa";
+import logo from "../assets/log.svg";
 import { 
   XAxis, 
   YAxis, 
@@ -206,8 +207,8 @@ export default function StudentAnalyticsView({ stats }) {
         <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-10">
             <h3 className="text-xl font-black text-slate-900">Détails de progression</h3>
-            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-               <FaGraduationCap />
+            <div className="w-10 h-10 flex items-center justify-center">
+               <img src={logo} alt="Logo" className="w-full h-full object-contain" />
             </div>
           </div>
           <div className="space-y-6">

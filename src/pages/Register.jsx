@@ -2,6 +2,7 @@ import { useState } from "react";
 import { registerUser } from "../api/userApi";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import logo from "../assets/log.svg";
 import { 
   FiUser, 
   FiMail, 
@@ -91,14 +92,14 @@ export default function Register() {
       >
         <div className="absolute inset-0 flex flex-col justify-between p-12">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <FaGraduationCap className="w-6 h-6 text-white" />
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity w-fit">
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src={logo} alt="Logo" className="w-full h-full object-contain" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
-              Mini Academy
+              Elevated Academy
             </span>
-          </div>
+          </Link>
 
           {/* Main content */}
           <div className="max-w-sm">
@@ -135,7 +136,7 @@ export default function Register() {
           className="w-full max-w-md"
         >
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-          <p className="text-gray-600 mb-8">Get started with Mini Academy today.</p>
+          <p className="text-gray-600 mb-8">Get started with Elevated Academy today.</p>
 
           {error && (
             <motion.div 

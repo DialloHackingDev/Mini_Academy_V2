@@ -7,6 +7,7 @@ import {
   FiBell, FiChevronRight
 } from "react-icons/fi";
 import { FaGraduationCap } from "react-icons/fa";
+import logo from "../assets/log.svg";
 import { useAuth } from "../context/AuthContext";
 import { getAdminDashboard, deleteUser, disableUser, deleteCourseAdmin } from "../api/adminApi";
 import AmazonNavbar from "../components/AmazonNavbar";
@@ -59,13 +60,15 @@ export default function AdminDashboard() {
     <aside className={`fixed inset-y-0 left-0 z-40 w-80 bg-slate-900 flex flex-col transform transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:relative lg:translate-x-0 lg:flex`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-          <FaGraduationCap className="text-white w-5 h-5" />
-        </div>
-        <div>
-          <p className="text-white font-black text-sm leading-tight">Elevated</p>
-          <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">Admin Panel</p>
-        </div>
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1">
+          <div className="w-9 h-9 flex items-center justify-center">
+            <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <p className="text-white font-black text-sm leading-tight">Elevated</p>
+            <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">Admin Panel</p>
+          </div>
+        </Link>
         <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto text-slate-400 hover:text-white"><FiX /></button>
       </div>
 

@@ -31,7 +31,7 @@ import {
 } from "react-icons/md";
 import { getCourses } from "../api/courApi.jsx";
 import AmazonNavbar from "../components/AmazonNavbar.jsx";
-import { FaGraduationCap } from "react-icons/fa";
+import logo from "../assets/log.svg";
 import { getPlatformReviews } from "../api/platformReviewApi.jsx";
 
 // Animation hook
@@ -799,8 +799,8 @@ export default function Home() {
           >
             <motion.div variants={fadeInUp} className="col-span-2 md:col-span-1">
               <Link to="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <FaGraduationCap className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-lg font-bold text-gray-900">Elevated Academy</span>
               </Link>

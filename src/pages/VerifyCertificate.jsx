@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiCheckCircle, FiXCircle, FiArrowLeft } from 'react-icons/fi';
 import { FaGraduationCap } from 'react-icons/fa';
+import logo from '../assets/log.svg';
 import api from '../api/api';
 
 export default function VerifyCertificate() {
@@ -43,9 +44,9 @@ export default function VerifyCertificate() {
         className="bg-white rounded-3xl shadow-xl max-w-md w-full p-10 text-center"
       >
         {/* Logo */}
-        <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <FaGraduationCap className="text-white w-7 h-7" />
-        </div>
+        <Link to="/" className="w-14 h-14 flex items-center justify-center mx-auto mb-6 hover:opacity-80 transition-opacity block">
+          <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+        </Link>
 
         <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-6">
           Elevated Academy · Vérification de certificat

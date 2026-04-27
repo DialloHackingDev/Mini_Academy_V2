@@ -3,6 +3,7 @@ import { loginUser } from "../api/userApi";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
+import logo from "../assets/log.svg";
 import { 
   FiMail, 
   FiLock, 
@@ -121,9 +122,11 @@ export default function Login() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute inset-0 flex items-center justify-center p-12">
           <div className="text-white max-w-md">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8">
-              <FaGraduationCap className="w-8 h-8 text-white" />
-            </div>
+            <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
+              <div className="w-16 h-16 flex items-center justify-center mb-8">
+                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+              </div>
+            </Link>
             <h2 className="text-4xl font-bold mb-4">Curate Your Digital Campus.</h2>
             <p className="text-lg text-white/80">
               Join The Elevated Academy to experience learning designed with editorial reverence and SaaS efficiency.
@@ -145,12 +148,12 @@ export default function Login() {
           className="w-full max-w-md"
         >
           {/* Logo */}
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <FaGraduationCap className="w-6 h-6 text-white" />
+          <Link to="/" className="flex items-center gap-2 mb-8 hover:opacity-80 transition-opacity w-fit">
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src={logo} alt="Logo" className="w-full h-full object-contain" />
             </div>
             <span className="text-xl font-bold text-gray-900">Elevated Academy</span>
-          </div>
+          </Link>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
           <p className="text-gray-600 mb-8">Please enter your details to sign in.</p>

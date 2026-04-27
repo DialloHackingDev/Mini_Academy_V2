@@ -249,6 +249,11 @@ export default function CourseDetails() {
   };
 
   const addToCart = () => {
+    if (!token || !user) {
+      alert("Vous devez être connecté pour ajouter un cours au panier.");
+      navigate('/login');
+      return;
+    }
     if (!course) return;
     
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -282,6 +287,11 @@ export default function CourseDetails() {
   };
 
   const handleWishlist = () => {
+    if (!token || !user) {
+      alert("Vous devez être connecté pour ajouter un cours à votre wishlist.");
+      navigate('/login');
+      return;
+    }
     if (!course) return;
     const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     if (wishlist.some(item => item._id === course._id)) {

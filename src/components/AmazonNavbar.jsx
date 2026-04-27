@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "../assets/log.svg";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getMyNotifications, markNotificationAsRead, deleteNotification } from "../api/notificationApi";
@@ -159,20 +160,47 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
     <nav className={`sticky top-0 z-50 transition-all duration-300 text-white ${isScrolled ? 'bg-slate-900/80 backdrop-blur-md shadow-xl py-1' : 'bg-slate-900 py-2'}`}>
       {/* Main Navbar */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4 h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/20">
-              <FaGraduationCap className="w-6 h-6 text-white" />
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4 py-3 lg:py-0 lg:h-16">
+          {/* Top Row Mobile / Left Desktop */}
+          <div className="flex items-center justify-between w-full lg:w-auto">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0 group">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-base sm:text-lg font-black text-white leading-tight block tracking-tight">Elevated</span>
+                <span className="text-[9px] sm:text-[10px] font-black text-emerald-400 uppercase tracking-widest">Academy</span>
+              </div>
+            </Link>
+
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-2 lg:hidden">
+              {!token ? (
+                <Link to="/login" className="text-sm font-medium hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors text-white">
+                  {t('login')}
+                </Link>
+              ) : (
+                <Link to="/cart" className="relative p-2 hover:bg-slate-800 rounded-lg transition-colors text-white">
+                  <FiShoppingCart className="w-5 h-5 text-white" />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-white"
+              >
+                {mobileMenuOpen ? <FiX className="w-6 h-6 text-white" /> : <FiMenu className="w-6 h-6 text-white" />}
+              </button>
             </div>
-            <div className="hidden sm:block">
-              <span className="text-lg font-black text-white leading-tight block tracking-tight">Elevated</span>
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Academy</span>
-            </div>
-          </Link>
+          </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-3xl mx-4">
+          <div className="flex-1 w-full max-w-3xl lg:mx-4 order-3 lg:order-none">
             <div className="relative flex">
               <input 
                 type="text" 
@@ -386,28 +414,21 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
               </>
             )}
 
-            {/* Cart - Dynamic count for connected users */}
-            <Link to="/cart" className="flex items-center hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white">
-              <div className="relative">
-                <FiShoppingCart className="w-6 h-6 text-white" />
-                {(token && cartCount > 0) && (
-                  <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
-                {!token && (
-                  <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
-                )}
-              </div>
-            </Link>
+            {/* Cart - Only for connected users */}
+            {token && (
+              <Link to="/cart" className="flex items-center hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white">
+                <div className="relative">
+                  <FiShoppingCart className="w-6 h-6 text-white" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            )}
           </div>
 
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors text-white"
-          >
-            {mobileMenuOpen ? <FiX className="w-6 h-6 text-white" /> : <FiMenu className="w-6 h-6 text-white" />}
-          </button>
         </div>
       </div>
 
@@ -473,8 +494,8 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
             >
                <div className="p-6 border-b border-slate-800 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center">
-                      <FaGraduationCap className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 flex items-center justify-center">
+                      <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                     </div>
                     <span className="font-bold text-white">Elevated</span>
                   </div>
