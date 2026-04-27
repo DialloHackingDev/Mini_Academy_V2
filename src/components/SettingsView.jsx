@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { 
   FiUser, 
   FiMail, 
@@ -9,20 +8,16 @@ import {
   FiCamera,
   FiCheckCircle,
   FiAlertCircle,
-  FiHelpCircle
+  FiHelpCircle,
+  FiGlobe
 } from "react-icons/fi";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
-
-const tabs = [
-  { id: 'profile', label: 'Profile', icon: FiUser },
-  { id: 'account', label: 'Account', icon: FiMail },
-  { id: 'notifications', label: 'Notifications', icon: FiBell },
-  { id: 'security', label: 'Security', icon: FiShield },
-];
+import { useLanguage } from "../context/LanguageContext";
 
 export default function SettingsView({ userProfile, onProfileUpdate }) {
   const { updateUserData } = useAuth();
+  const { language, t, switchLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -32,7 +27,15 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
     jobTitle: "",
     email: "",
     bio: "",
+    notifications: true,
   });
+
+  const tabs = [
+    { id: 'profile', label: t('profile'), icon: FiUser },
+    { id: 'account', label: t('account'), icon: FiMail },
+    { id: 'notifications', label: t('notifications'), icon: FiBell },
+    { id: 'security', label: t('security'), icon: FiShield },
+  ];
 
   useEffect(() => {
     if (userProfile) {
@@ -41,6 +44,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
         jobTitle: userProfile.jobTitle || "",
         email: userProfile.email || "",
         bio: userProfile.bio || "",
+        notifications: userProfile.notifications !== undefined ? userProfile.notifications : true,
       });
     }
   }, [userProfile]);
@@ -58,7 +62,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
     try {
       const res = await api.put("/users/profile", form);
       if (res.data.success) {
-        setSuccess("Profile updated successfully!");
+        setSuccess(t('success_profile_update'));
         if (onProfileUpdate) onProfileUpdate(res.data.user);
         updateUserData({ 
           username: res.data.user.username, 
@@ -66,7 +70,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.msg || "Error updating profile");
+      setError(err.response?.data?.msg || t('error_profile_update'));
     } finally {
       setLoading(false);
     }
@@ -75,8 +79,8 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your account preferences and secure your learning experience.</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('settings')}</h1>
+        <p className="text-gray-600">{t('settings_desc')}</p>
       </div>
 
       {/* Tabs */}
@@ -104,11 +108,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
         {/* Main Form Area */}
         <div className="lg:col-span-2 space-y-6">
           {activeTab === 'profile' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm"
-            >
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
               {/* Profile Photo Section */}
               <div className="flex flex-col sm:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-10 pb-8 border-b border-gray-100 text-center sm:text-left">
                 <div className="relative group">
@@ -124,8 +124,8 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                   </button>
                 </div>
                 <div>
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1">Photo de profil</h3>
-                  <p className="text-[10px] md:text-sm text-gray-500 mb-4">Taille recommandée: 400x400px.</p>
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1">{t('photo_profil')}</h3>
+                  <p className="text-[10px] md:text-sm text-gray-500 mb-4">{t('recommanded_size')}</p>
                   <input 
                     type="file" 
                     id="profile-upload" 
@@ -144,12 +144,13 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                           headers: { 'Content-Type': 'multipart/form-data' }
                         });
                         if (res.data.success) {
-                          setSuccess("Photo de profil mise à jour !");
+                          setSuccess(t('success_profile_update'));
                           if (onProfileUpdate) onProfileUpdate(res.data.user);
                           updateUserData({ profileImage: res.data.user.profileImage });
                         }
-                      } catch (err) {
-                        setError("Erreur lors de l'upload de l'image");
+                      } catch (error) {
+                        console.error(error);
+                        setError(t('error_profile_update'));
                       } finally {
                         setLoading(false);
                       }
@@ -160,21 +161,21 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                       onClick={() => document.getElementById('profile-upload').click()}
                       className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg text-xs md:text-sm font-semibold hover:bg-emerald-100 transition-all"
                     >
-                      Modifier
+                      {t('modifier')}
                     </button>
                     <button className="px-4 py-2 text-gray-600 text-xs md:text-sm font-semibold hover:bg-gray-50 rounded-lg transition-colors">
-                      Supprimer
+                      {t('supprimer')}
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Personal Information Form */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Personal Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('personal_info')}</h3>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('username')}</label>
                     <input 
                       type="text"
                       name="username"
@@ -185,7 +186,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Job Title</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('job_title')}</label>
                     <input 
                       type="text"
                       name="jobTitle"
@@ -198,7 +199,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('email')}</label>
                   <div className="relative">
                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input 
@@ -213,7 +214,7 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bio</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('bio')}</label>
                   <textarea 
                     name="bio"
                     value={form.bio}
@@ -240,26 +241,102 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
 
                 <div className="flex justify-end gap-4 pt-4">
                   <button type="button" className="px-6 py-2.5 text-gray-700 font-semibold hover:bg-gray-100 rounded-xl transition-all">
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button 
                     type="submit" 
                     disabled={loading}
                     className="px-8 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-500/20 transition-all disabled:opacity-50"
                   >
-                    {loading ? "Saving..." : "Save Changes"}
+                    {loading ? "..." : t('save_changes')}
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           )}
 
-          {(activeTab === 'account' || activeTab === 'notifications' || activeTab === 'security') && (
+          {activeTab === 'account' && (
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('language')}</h3>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-5 border border-gray-100 rounded-3xl bg-gray-50/50">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-emerald-600 border border-gray-100">
+                      <FiGlobe className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{t('language')}</p>
+                      <p className="text-sm text-gray-500">{t('choose_language')}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => switchLanguage('fr')}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${language === 'fr' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      Français
+                    </button>
+                    <button 
+                      onClick={() => switchLanguage('en')}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${language === 'en' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      English
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('notifications')}</h3>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-5 border border-gray-100 rounded-3xl">
+                  <div>
+                    <p className="font-semibold text-gray-900">Activer les notifications</p>
+                    <p className="text-sm text-gray-500">Recevez des alertes pour les nouveaux cours, les messages et les mises à jour.</p>
+                  </div>
+                  <label className="inline-flex relative items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.notifications}
+                      onChange={(e) => setForm({ ...form, notifications: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 rounded-full peer-focus:ring-4 peer-focus:ring-emerald-300 peer-checked:bg-emerald-600 transition-all"></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow transform transition ${form.notifications ? 'translate-x-5' : ''}`}></div>
+                  </label>
+                </div>
+                <div className="flex justify-end gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('profile')}
+                    className="px-6 py-2.5 text-gray-700 font-semibold hover:bg-gray-100 rounded-xl transition-all"
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-8 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-500/20 transition-all disabled:opacity-50"
+                  >
+                    {loading ? "..." : t('save_changes')}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'security' && (
             <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
               <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                {tabs.find(t => t.id === activeTab).icon({ className: "w-8 h-8" })}
+                <FiShield className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{tabs.find(t => t.id === activeTab).label} Settings</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('security')} Settings</h3>
               <p className="text-gray-500">This section is under construction. Coming soon!</p>
             </div>
           )}
@@ -269,22 +346,22 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
         <div className="space-y-6">
           {/* Account Overview Card */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-6">Account Overview</h3>
+            <h3 className="font-bold text-gray-900 mb-6">{t('account_overview')}</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Membership</span>
+                <span className="text-gray-500">{t('membership')}</span>
                 <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                  {userProfile?.role === 'eleve' ? 'Student' : 'Instructor'}
+                  {userProfile?.role === 'eleve' ? t('eleve') : userProfile?.role === 'prof' ? t('prof') : t('admin')}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Joined</span>
+                <span className="text-gray-500">{t('joined')}</span>
                 <span className="font-medium text-gray-900">
-                  {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2024'}
+                  {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', year: 'numeric' }) : 'Jan 2024'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Courses Completed</span>
+                <span className="text-gray-500">{t('courses_completed')}</span>
                 <span className="font-medium text-gray-900">12</span>
               </div>
             </div>
@@ -310,8 +387,8 @@ export default function SettingsView({ userProfile, onProfileUpdate }) {
               <FiHelpCircle className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-gray-900 text-sm">Need help?</p>
-              <p className="text-xs text-gray-500">Chat with our support team</p>
+              <p className="font-bold text-gray-900 text-sm">{t('need_help')}</p>
+              <p className="text-xs text-gray-500">{t('chat_support')}</p>
             </div>
           </div>
         </div>

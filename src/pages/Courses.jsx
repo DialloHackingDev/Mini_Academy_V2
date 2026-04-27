@@ -312,7 +312,7 @@ export default function Courses() {
                           ? 'bg-emerald-500 text-white' 
                           : 'bg-white/90 text-gray-900'
                       }`}>
-                        {course.price === 0 ? 'Free' : `$${course.price}`}
+                        {course.price === 0 ? 'Gratuit' : `$${course.price}`}
                       </span>
                     </div>
                   </div>
@@ -329,7 +329,7 @@ export default function Courses() {
                     {/* Instructor */}
                     {course.professor && (
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-purple-400 flex items-center justify-center text-white text-xs font-bold">
                           {course.professor.username?.[0]?.toUpperCase() || 'P'}
                         </div>
                         <span className="text-xs text-gray-500">{course.professor.username}</span>

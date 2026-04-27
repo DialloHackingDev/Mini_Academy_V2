@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   FiPlay,
   FiFileText,
@@ -43,6 +42,7 @@ export default function CourseDetails() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [isFavored, setIsFavored] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [sectionsExpanded, setSectionsExpanded] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -82,23 +82,24 @@ export default function CourseDetails() {
     fetchCourse();
   }, [id, user]);
 
-  // Fetch related courses
+  // Fetch related courses by category for more relevant recommendations
   useEffect(() => {
     const fetchRelated = async () => {
       try {
         const res = await getCourses();
         const allCourses = res.data || res || [];
-        // Filter out current course and limit to 4
-        const filtered = allCourses.filter(c => c._id !== id).slice(0, 4);
-        setRelatedCourses(filtered);
+        const filtered = allCourses
+          .filter(c => c._id !== id && c.category === course?.category)
+          .slice(0, 4);
+        setRelatedCourses(filtered.length ? filtered : allCourses.filter(c => c._id !== id).slice(0, 4));
       } catch (err) {
         console.error("Error fetching related courses:", err);
       }
     };
-    fetchRelated();
-  }, [id]);
+    if (course) fetchRelated();
+  }, [id, course]);
 
-  // Fetch reviews and check if favored
+  // Fetch reviews and favorite status once the course is available
   useEffect(() => {
     if (id && token) {
       fetchReviews();
@@ -125,6 +126,91 @@ export default function CourseDetails() {
       console.error("Error checking favorite status:", error);
     }
   };
+
+  const getCourseDuration = () => {
+    const minutes = course?.modules?.reduce((moduleTotal, module) => {
+      return moduleTotal + (module.lessons?.reduce((lessonTotal, lesson) => lessonTotal + (Number(lesson.duration) || 0), 0) || 0);
+    }, 0) || 0;
+
+    if (minutes > 0) {
+      return `${Math.ceil(minutes / 60)} hours`;
+    }
+
+    const lessons = course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 1;
+    return `${Math.max(1, lessons * 5)} hours`;
+  };
+
+  const buildEmbedUrl = (url) => {
+    if (!url) return url;
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      return url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/');
+    }
+    if (url.includes('vimeo.com')) {
+      return url.replace('vimeo.com/', 'player.vimeo.com/video/');
+    }
+    return url;
+  };
+
+  const isEmbedUrl = (url) => {
+    return url?.includes('youtube.com') || url?.includes('youtu.be') || url?.includes('vimeo.com');
+  };
+
+  const getFirstVideoLesson = () => {
+    if (!course?.modules?.length) return null;
+    const allLessons = course.modules.flatMap(module => module.lessons || []);
+    return allLessons.find(lesson => lesson.type === 'video' || lesson.videoUrl || lesson.videoFile?.filename);
+  };
+
+  const getVideoSource = (url, file) => {
+    if (file?.filename) {
+      return {
+        type: 'file',
+        src: `http://localhost:5000/uploads/videos/${file.filename}`
+      };
+    }
+    if (!url) return null;
+    if (isEmbedUrl(url)) {
+      return {
+        type: 'embed',
+        src: buildEmbedUrl(url)
+      };
+    }
+    return {
+      type: 'video',
+      src: url
+    };
+  };
+
+  const getPreviewVideoSource = () => {
+    const lesson = getFirstVideoLesson();
+    if (course?.previewVideoUrl) {
+      return getVideoSource(course.previewVideoUrl, null);
+    }
+    if (lesson?.videoFile?.filename) {
+      return getVideoSource(null, lesson.videoFile);
+    }
+    if (lesson?.videoUrl) {
+      return getVideoSource(lesson.videoUrl, null);
+    }
+    return null;
+  };
+
+  const getFullVideoSource = () => {
+    if (course?.videoFile?.filename) {
+      return getVideoSource(null, course.videoFile);
+    }
+
+    if (course?.videoUrl) {
+      return getVideoSource(course.videoUrl, null);
+    }
+
+    return null;
+  };
+
+  const getArticleCount = () => course?.modules?.reduce((total, module) => total + (module.lessons?.filter(lesson => lesson.type === 'text').length || 0), 0) || 0;
+  const getResourceCount = () => course?.modules?.reduce((total, module) => total + (module.lessons?.filter(lesson => lesson.type === 'pdf' || lesson.pdfFile?.filename).length || 0), 0) || 0;
+  const getTotalLessons = () => course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 0;
+  const getModuleCount = () => course?.modules?.length || 0;
 
   const handleEnroll = async () => {
     if (!user || !token) {
@@ -195,74 +281,6 @@ export default function CourseDetails() {
     alert('Cours ajouté au panier !');
   };
 
-  const getFirstVideoLesson = () => {
-    if (!course?.modules?.length) return null;
-    const allLessons = course.modules.flatMap(module => module.lessons || []);
-    return allLessons.find(lesson => lesson.type === 'video' || lesson.videoUrl || lesson.videoFile?.filename);
-  };
-
-  const getPreviewVideoSource = () => {
-    const lesson = getFirstVideoLesson();
-    if (course?.previewVideoUrl) {
-      return {
-        type: 'external',
-        src: course.previewVideoUrl
-      };
-    }
-
-    if (lesson?.videoFile?.filename) {
-      return {
-        type: 'file',
-        src: `http://localhost:5000/uploads/videos/${lesson.videoFile.filename}`
-      };
-    }
-
-    if (lesson?.videoUrl) {
-      return {
-        type: 'external',
-        src: lesson.videoUrl
-      };
-    }
-
-    return null;
-  };
-
-  const getFullVideoSource = () => {
-    if (course?.videoFile?.filename) {
-      return {
-        type: 'file',
-        src: `http://localhost:5000/uploads/videos/${course.videoFile.filename}`
-      };
-    }
-
-    if (course?.videoUrl) {
-      return {
-        type: 'external',
-        src: course.videoUrl
-      };
-    }
-
-    return null;
-  };
-
-  const getCourseDuration = () => {
-    const minutes = course?.modules?.reduce((moduleTotal, module) => {
-      return moduleTotal + (module.lessons?.reduce((lessonTotal, lesson) => lessonTotal + (Number(lesson.duration) || 0), 0) || 0);
-    }, 0) || 0;
-
-    if (minutes > 0) {
-      return `${Math.ceil(minutes / 60)} hours`;
-    }
-
-    const lessons = course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 1;
-    return `${Math.max(1, lessons * 5)} hours`;
-  };
-
-  const getArticleCount = () => course?.modules?.reduce((total, module) => total + (module.lessons?.filter(lesson => lesson.type === 'text').length || 0), 0) || 0;
-  const getResourceCount = () => course?.modules?.reduce((total, module) => total + (module.lessons?.filter(lesson => lesson.type === 'pdf' || lesson.pdfFile?.filename).length || 0), 0) || 0;
-  const getTotalLessons = () => course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 0;
-  const getModuleCount = () => course?.modules?.length || 0;
-
   const handleWishlist = () => {
     if (!course) return;
     const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
@@ -281,7 +299,8 @@ export default function CourseDetails() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       alert('Lien du cours copié !');
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       alert('Impossible de copier le lien. Merci de le copier manuellement.');
     }
   };
@@ -297,13 +316,24 @@ export default function CourseDetails() {
       return;
     }
 
+    if (favoriteLoading) {
+      return;
+    }
+
+    setFavoriteLoading(true);
     try {
       const res = await toggleFavorite(id);
-      setIsFavored(res.isFavored);
-      alert(res.message);
+      if (res?.success) {
+        setIsFavored(res.isFavored);
+        alert(res.message || (res.isFavored ? 'Ajouté aux favoris' : 'Retiré des favoris'));
+      } else {
+        alert(res.message || "Erreur lors de la mise à jour des favoris");
+      }
     } catch (error) {
       console.error("Error toggling favorite:", error);
       alert("Erreur lors de l'ajout aux favoris");
+    } finally {
+      setFavoriteLoading(false);
     }
   };
 
@@ -338,12 +368,20 @@ export default function CourseDetails() {
   const previewVideoSource = getPreviewVideoSource();
   const fullVideoSource = getFullVideoSource();
   const previewVideoTitle = getFirstVideoLesson()?.title || course?.title || 'Course preview';
+  const courseLanguage = course?.language || 'English';
+  const courseStudentsCount = course?.students?.length || 0;
+  const courseTotalReviews = course?.stats?.totalReviews || reviews.length || 0;
+  const courseAverageRating = course?.stats?.averageRating || avgRating || 0;
+  const instructorName = course?.professor?.username || 'Instructor';
+  const instructorRating = course?.professor?.rating || courseAverageRating || 4.5;
+  const instructorStudents = course?.professor?.studentsCount || courseStudentsCount || 0;
+  const instructorCoursesCount = course?.professor?.coursesCount || 0;
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading course...</p>
         </div>
       </div>
@@ -356,7 +394,7 @@ export default function CourseDetails() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h2>
           <p className="text-gray-600 mb-4">The course you're looking for doesn't exist.</p>
-          <Link to="/courses" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link to="/courses" className="text-emerald-600 hover:text-emerald-700 font-medium">
             Browse all courses
           </Link>
         </div>
@@ -374,12 +412,6 @@ export default function CourseDetails() {
     "Build complete projects from scratch",
     "Earn a certificate of completion",
   ];
-
-  // Use real course stats if available, otherwise defaults
-  const courseStats = course.stats || {};
-  const courseAvgRating = courseStats.averageRating || 4.5;
-  const totalReviews = courseStats.totalReviews || 598;
-  const totalStudents = courseStats.totalStudents || course.students?.length || 3714;
 
   return (
     <div className="min-h-screen bg-white">
@@ -405,15 +437,15 @@ export default function CourseDetails() {
               <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
                 <span className="flex items-center gap-1 text-amber-400">
                   <FiStar className="fill-current" />
-                  <span className="font-bold">{courseAvgRating}</span>
-                  <span className="text-slate-400">({totalReviews} ratings)</span>
+                  <span className="font-bold">{courseAverageRating.toFixed(1)}</span>
+                  <span className="text-slate-400">({courseTotalReviews} ratings)</span>
                 </span>
-                <span className="text-slate-400">{totalStudents.toLocaleString()} students</span>
+                <span className="text-slate-400">{courseStudentsCount.toLocaleString()} students</span>
                 {course.professor && (
                   <>
                     <span className="text-slate-400">Created by</span>
-                    <Link to="#" className="text-indigo-400 hover:underline underline-offset-4">
-                      {course.professor.username}
+                    <Link to="#" className="text-emerald-400 hover:underline underline-offset-4">
+                      {instructorName}
                     </Link>
                   </>
                 )}
@@ -427,7 +459,7 @@ export default function CourseDetails() {
                 </span>
                 <span className="flex items-center gap-1">
                   <FiGlobe className="w-4 h-4" />
-                  English
+                  {courseLanguage}
                 </span>
                 <span className="flex items-center gap-1">
                   <FiAward className="w-4 h-4" />
@@ -439,13 +471,14 @@ export default function CourseDetails() {
             {/* Video Preview Card (Mobile) */}
             <div className="lg:hidden">
               <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden relative">
-                {previewVideoSource?.type === 'file' ? (
+                {previewVideoSource?.type === 'file' || previewVideoSource?.type === 'video' ? (
                   <VideoPlayer
                     src={previewVideoSource.src}
                     title={previewVideoTitle}
+                    poster={course.coverImage?.filename ? `http://localhost:5000/uploads/covers/${course.coverImage.filename}` : undefined}
                     className="w-full h-full"
                   />
-                ) : previewVideoSource?.type === 'external' ? (
+                ) : previewVideoSource?.type === 'embed' ? (
                   <iframe
                     src={previewVideoSource.src}
                     title={`${previewVideoTitle} - Preview`}
@@ -507,7 +540,7 @@ export default function CourseDetails() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-900">Course content</h2>
-                <button onClick={toggleExpandSections} className="text-indigo-600 text-sm font-medium hover:underline">
+                <button onClick={toggleExpandSections} className="text-emerald-600 text-sm font-medium hover:underline">
                   {sectionsExpanded ? 'Collapse all sections' : 'Expand all sections'}
                 </button>
               </div>
@@ -552,8 +585,8 @@ export default function CourseDetails() {
               {course.courseType === 'video' && (
                 <div className="bg-slate-50 rounded-lg p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                      <FiVideo className="w-6 h-6 text-indigo-600" />
+                    <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                      <FiVideo className="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-slate-900">Video Course</h3>
@@ -563,27 +596,25 @@ export default function CourseDetails() {
                   
                   {/* Show video if available and enrolled/free */}
                   {(course.price === 0 || isEnrolled) && token && fullVideoSource ? (
-                    fullVideoSource.type === 'file' ? (
-                      <VideoPlayer
+                    fullVideoSource.type === 'embed' ? (
+                      <iframe
                         src={fullVideoSource.src}
-                        title={course.title}
-                        className="h-[400px] rounded-lg"
+                        title={`${course.title} - Video`}
+                        className="w-full h-[400px] rounded-lg"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
                       />
                     ) : (
                       <VideoPlayer
                         src={fullVideoSource.src}
                         title={course.title}
+                        poster={course.coverImage?.filename ? `http://localhost:5000/uploads/covers/${course.coverImage.filename}` : undefined}
                         className="h-[400px] rounded-lg"
                       />
                     )
                   ) : previewVideoSource ? (
-                    previewVideoSource.type === 'file' ? (
-                      <VideoPlayer
-                        src={previewVideoSource.src}
-                        title={previewVideoTitle}
-                        className="h-[400px] rounded-lg"
-                      />
-                    ) : (
+                    previewVideoSource.type === 'embed' ? (
                       <iframe
                         src={previewVideoSource.src}
                         title={`${previewVideoTitle} - Preview`}
@@ -591,6 +622,13 @@ export default function CourseDetails() {
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
+                      />
+                    ) : (
+                      <VideoPlayer
+                        src={previewVideoSource.src}
+                        title={previewVideoTitle}
+                        poster={course.coverImage?.filename ? `http://localhost:5000/uploads/covers/${course.coverImage.filename}` : undefined}
+                        className="h-[400px] rounded-lg"
                       />
                     )
                   ) : (
@@ -693,31 +731,30 @@ export default function CourseDetails() {
             <section className="border-t border-slate-200 pt-8">
               <h2 className="text-xl font-bold text-slate-900 mb-4">Instructor</h2>
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white text-xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-purple-400 flex items-center justify-center text-white text-xl font-bold">
                   {course.professor?.username?.[0]?.toUpperCase() || 'A'}
                 </div>
                 <div>
-                  <Link to="#" className="text-indigo-600 font-semibold hover:underline">
+                  <Link to="#" className="text-emerald-600 font-semibold hover:underline">
                     {course.professor?.username || 'Alex Instructor'}
                   </Link>
                   <p className="text-slate-500 text-sm mb-2">{course.professor?.jobTitle || 'Senior Developer & Instructor'}</p>
                   <div className="flex items-center gap-4 text-sm text-slate-600">
                     <span className="flex items-center gap-1">
                       <FiStar className="w-4 h-4 text-amber-500" />
-                      {course.professor?.rating || '4.5'} Instructor Rating
+                      {instructorRating.toFixed(1)} Rating
                     </span>
                     <span className="flex items-center gap-1">
                       <FiUsers className="w-4 h-4" />
-                      {course.professor?.studentsCount || '12,356'} Students
+                      {instructorStudents.toLocaleString()} Students
                     </span>
                     <span className="flex items-center gap-1">
                       <FiPlayCircle className="w-4 h-4" />
-                      {course.professor?.coursesCount || '22'} Courses
+                      {instructorCoursesCount || '1'} Courses
                     </span>
                   </div>
                   <p className="text-slate-600 mt-3 text-sm leading-relaxed">
-                    Experienced instructor with over 10 years in the industry.
-                    Passionate about teaching and helping students achieve their goals.
+                    {course.professor?.bio || 'Experienced instructor with real-world industry experience and a passion for teaching.'}
                   </p>
                 </div>
               </div>
@@ -738,9 +775,9 @@ export default function CourseDetails() {
                 </div>
               </div>
 
-              {course.reviews && course.reviews.length > 0 ? (
+              {reviews.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-6">
-                  {course.reviews.map((review, idx) => (
+                  {reviews.map((review, idx) => (
                     <div key={idx} className="border-b border-slate-100 pb-4">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-semibold">
@@ -764,7 +801,7 @@ export default function CourseDetails() {
                 </div>
               ) : (
                 <div className="text-slate-500">
-                  <p>No reviews yet. Be the first to review this course!</p>
+                  <p>Aucun avis pour l'instant. Soyez le premier à donner votre avis !</p>
                 </div>
               )}
 
@@ -799,14 +836,14 @@ export default function CourseDetails() {
                         onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                         placeholder="Partagez votre expérience avec ce cours..."
                         rows="4"
-                        className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={submittingReview}
-                      className="flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
                     >
                       <FiSend className="w-4 h-4" />
                       {submittingReview ? 'Envoi en cours...' : 'Publier votre avis'}
@@ -827,18 +864,26 @@ export default function CourseDetails() {
                       to={`/courses/${related._id}`}
                       className="flex gap-3 p-3 border border-slate-200 rounded-lg hover:shadow-md transition-all"
                     >
-                      <div className="w-24 h-16 bg-slate-200 rounded flex items-center justify-center flex-shrink-0">
-                        <span className="text-2xl">{related.courseType === 'video' ? '🎥' : '📚'}</span>
+                      <div className="w-24 h-16 bg-slate-200 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {related.coverImage?.filename ? (
+                          <img
+                            src={`http://localhost:5000/uploads/covers/${related.coverImage.filename}`}
+                            alt={related.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl">{related.courseType === 'video' ? '🎥' : '📚'}</span>
+                        )}
                       </div>
                       <div>
                         <h4 className="font-semibold text-slate-900 text-sm line-clamp-2">{related.title}</h4>
                         <p className="text-slate-500 text-xs mt-1">{related.professor?.username || 'Instructor'}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-amber-500 text-xs font-bold">4.5</span>
-                          <span className="text-slate-400 text-xs">({Math.floor(Math.random() * 1000) + 100})</span>
+                          <span className="text-amber-500 text-xs font-bold">{(related.stats?.averageRating || 4.5).toFixed(1)}</span>
+                          <span className="text-slate-400 text-xs">({related.stats?.totalReviews || 0})</span>
                         </div>
                         <p className="font-bold text-slate-900 text-sm mt-1">
-                          ${related.price || 0}
+                          {related.price === 0 ? 'Gratuit' : `${related.price?.toFixed(2) || '0.00'} $`}
                         </p>
                       </div>
                     </Link>
@@ -853,13 +898,14 @@ export default function CourseDetails() {
             <div className="lg:sticky lg:top-4 space-y-4">
               {/* Course Preview - Cover Image or Video */}
               <div className="hidden lg:block aspect-video bg-slate-900 rounded-lg overflow-hidden relative group cursor-pointer">
-                {previewVideoSource?.type === 'file' ? (
+                {previewVideoSource?.type === 'file' || previewVideoSource?.type === 'video' ? (
                   <VideoPlayer
                     src={previewVideoSource.src}
                     title={previewVideoTitle}
+                    poster={course.coverImage?.filename ? `http://localhost:5000/uploads/covers/${course.coverImage.filename}` : undefined}
                     className="w-full h-full"
                   />
-                ) : previewVideoSource?.type === 'external' ? (
+                ) : previewVideoSource?.type === 'embed' ? (
                   <iframe
                     src={previewVideoSource.src}
                     title={`${previewVideoTitle} - Preview`}
@@ -910,7 +956,7 @@ export default function CourseDetails() {
                     <p className="text-3xl font-bold text-slate-900 mb-2">Free</p>
                     <button
                       onClick={handleEnroll}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition-colors"
                     >
                       {isEnrolled ? 'Continue Learning' : 'Enroll Now'}
                     </button>
@@ -935,7 +981,7 @@ export default function CourseDetails() {
                       <div className="space-y-3">
                         <Link
                           to="/login"
-                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors block text-center"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition-colors block text-center"
                         >
                           Log in to Enroll
                         </Link>
@@ -944,7 +990,7 @@ export default function CourseDetails() {
                           className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
                             addedToCart
                               ? 'bg-emerald-600 text-white'
-                              : 'border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                              : 'border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50'
                           }`}
                         >
                           {addedToCart ? (
@@ -968,7 +1014,7 @@ export default function CourseDetails() {
                       <div className="space-y-3">
                         <button
                           onClick={handleEnroll}
-                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition-colors"
                         >
                           Buy Now
                         </button>
@@ -977,7 +1023,7 @@ export default function CourseDetails() {
                           className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
                             addedToCart
                               ? 'bg-emerald-600 text-white'
-                              : 'border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                              : 'border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50'
                           }`}
                         >
                           {addedToCart ? (
@@ -1008,7 +1054,7 @@ export default function CourseDetails() {
                         />
                         <button
                           onClick={applyCoupon}
-                          className="px-4 py-2 border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors text-sm font-medium"
+                          className="px-4 py-2 border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-50 transition-colors text-sm font-medium"
                         >
                           Apply
                         </button>
@@ -1045,7 +1091,8 @@ export default function CourseDetails() {
                 <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
                   <button 
                     onClick={handleToggleFavorite} 
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 border rounded transition-colors text-sm font-medium ${isFavored ? 'bg-red-600 text-white border-red-600' : 'border-slate-300 hover:bg-slate-50 text-slate-900'}`}
+                    disabled={favoriteLoading}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 border rounded transition-colors text-sm font-medium ${isFavored ? 'bg-red-600 text-white border-red-600' : 'border-slate-300 hover:bg-slate-50 text-slate-900'} ${favoriteLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <FiHeart className={`w-4 h-4 ${isFavored ? 'fill-current' : ''}`} />
                     {isFavored ? 'Favoris' : 'Favoriser'}
@@ -1064,7 +1111,7 @@ export default function CourseDetails() {
               {/* Team Access */}
               <div className="border border-slate-200 rounded-lg p-4">
                 <p className="text-sm text-slate-600">
-                  Training for your team? <Link to="#" className="text-indigo-600 font-medium hover:underline">Get this course for your team</Link>
+                  Training for your team? <Link to="#" className="text-emerald-600 font-medium hover:underline">Get this course for your team</Link>
                 </p>
               </div>
             </div>

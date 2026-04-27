@@ -15,7 +15,7 @@ export default function AdminOverview({ data = {}, onTabChange }) {
     { label: 'Professeurs', value: stats.totalProfessors, icon: FiBookOpen, accent: 'from-violet-500 to-fuchsia-500' },
     { label: 'Cours', value: stats.totalCourses, icon: FiBookOpen, accent: 'from-orange-500 to-amber-500' },
     { label: 'Revenu', value: currencyFormatter.format(stats.totalRevenue || 0), icon: FiDollarSign, accent: 'from-emerald-500 to-lime-500' },
-    { label: 'Certificats', value: stats.totalCertificates, icon: FiAward, accent: 'from-indigo-500 to-blue-500' },
+    { label: 'Certificats', value: stats.totalCertificates, icon: FiAward, accent: 'from-emerald-500 to-blue-500' },
   ];
 
   return (

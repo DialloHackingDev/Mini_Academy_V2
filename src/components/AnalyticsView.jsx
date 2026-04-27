@@ -46,7 +46,7 @@ export default function AnalyticsView({ stats, courses = [] }) {
 
   const topLocations = [
     { name: "France", percentage: 42, color: "emerald" },
-    { name: "Sénégal", percentage: 18, color: "indigo" },
+    { name: "Sénégal", percentage: 18, color: "emerald" },
     { name: "Canada", percentage: 12, color: "emerald" },
   ];
 
@@ -56,10 +56,10 @@ export default function AnalyticsView({ stats, courses = [] }) {
   const avgRating = stats?.averageRating ?? 0;
   
   const displayStats = [
-    { label: "Revenu Total", value: `${totalRevenue.toLocaleString()}€`, change: stats?.revenueGrowth ? `+${stats.revenueGrowth}%` : "+0%", isPositive: true, icon: FiDollarSign, color: "emerald" },
+    { label: "Revenu Total", value: `${totalRevenue.toLocaleString()} $`, change: stats?.revenueGrowth ? `+${stats.revenueGrowth}%` : "+0%", isPositive: true, icon: FiDollarSign, color: "emerald" },
     { label: "Taux de Réussite", value: "100%", change: "+0%", isPositive: true, icon: FiCheckCircle, color: "blue" },
     { label: "Satisfaction", value: `${avgRating}/5.0`, change: "0%", isPositive: true, icon: FiStar, color: "amber" },
-    { label: "Élèves Inscrits", value: totalStudents.toLocaleString(), change: stats?.studentGrowth ? `+${stats.studentGrowth}%` : "+0%", isPositive: true, icon: FiUsers, color: "indigo" },
+    { label: "Élèves Inscrits", value: totalStudents.toLocaleString(), change: stats?.studentGrowth ? `+${stats.studentGrowth}%` : "+0%", isPositive: true, icon: FiUsers, color: "emerald" },
   ];
 
   const handleExport = () => {
@@ -72,9 +72,9 @@ export default function AnalyticsView({ stats, courses = [] }) {
     const rows = courses.map(c => [
       c.title,
       c.category || "N/A",
-      `${c.price}€`,
+      `${c.price} $`,
       c.students?.length || 0,
-      `${(c.students?.length || 0) * (c.price || 0)}€`
+      `${(c.students?.length || 0) * (c.price || 0)} $`
     ]);
 
     const csvContent = [
@@ -149,7 +149,7 @@ export default function AnalyticsView({ stats, courses = [] }) {
                 <span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Revenus</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
                 <span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Élèves</span>
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function AnalyticsView({ stats, courses = [] }) {
                    </div>
                    <div className="text-right">
                       <p className="text-sm font-black text-slate-900">{course.students?.length || 0} Élèves</p>
-                      <p className="text-[10px] font-bold text-slate-400">{((course.students?.length || 0) * (course.price || 0)).toLocaleString()}€ récoltés</p>
+                      <p className="text-[10px] font-bold text-slate-400">{((course.students?.length || 0) * (course.price || 0)).toLocaleString()} $ récoltés</p>
                    </div>
                 </div>
              ))}

@@ -212,12 +212,12 @@ export default function TeacherDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="h-screen bg-slate-50 flex flex-col font-sans overflow-hidden">
       <AmazonNavbar />
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar Desktop */}
-        <aside className="w-80 bg-white border-r border-gray-200 hidden lg:flex flex-col">
+        <aside className="fixed inset-y-0 left-0 z-40 w-80 bg-slate-900 flex flex-col transform transition-transform duration-300 hidden lg:flex lg:relative lg:translate-x-0" >
           <div className="flex-1 py-10 px-6 space-y-3">
              <div className="px-5 mb-8 flex items-center gap-4">
                 <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/20 overflow-hidden">
@@ -283,8 +283,8 @@ export default function TeacherDashboard() {
                      {[
                        { label: 'Cours Actifs', value: courses.length, color: 'emerald', icon: FiBook },
                        { label: 'Élèves Totaux', value: courses.reduce((acc, c) => acc + (c.students?.length || 0), 0), color: 'blue', icon: FiUsers },
-                       { label: 'Note Moyenne', value: '4.8', color: 'orange', icon: FiPlusCircle },
-                       { label: 'Ventes', value: '3,200€', color: 'purple', icon: FiBarChart2 },
+                       { label: 'Note Moyenne', value: analyticsData?.averageRating || '0', color: 'orange', icon: FiPlusCircle },
+                       { label: 'Ventes', value: analyticsData?.totalRevenue ? `$${analyticsData.totalRevenue.toLocaleString()}` : '$0', color: 'purple', icon: FiBarChart2 },
                      ].map((s, i) => {
                        const Icon = s.icon;
                        return (
@@ -326,7 +326,7 @@ export default function TeacherDashboard() {
                                 <span>{course.students?.length || 0} élèves</span>
                              </div>
                              <div className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg">
-                                {course.price === 0 ? "Gratuit" : `${course.price}€`}
+                                {course.price === 0 ? "Gratuit" : `$${course.price}`}
                              </div>
                           </div>
                           <div className="flex items-center gap-2">

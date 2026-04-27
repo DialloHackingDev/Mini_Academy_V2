@@ -150,7 +150,7 @@ const CoursePlayer = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
@@ -162,7 +162,7 @@ const CoursePlayer = () => {
           <p className="text-gray-600">Cours non trouvé</p>
           <button
             onClick={() => navigate('/courses')}
-            className="mt-4 text-indigo-600 hover:text-indigo-800"
+            className="mt-4 text-emerald-600 hover:text-emerald-800"
           >
             Retour aux cours
           </button>
@@ -180,7 +180,7 @@ const CoursePlayer = () => {
         {/* Logo */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">E</span>
             </div>
             <div>
@@ -200,7 +200,7 @@ const CoursePlayer = () => {
             <FiBook className="w-5 h-5" />
             <span>Courses</span>
           </Link>
-          <Link to="/dashboard" className="flex items-center space-x-3 px-4 py-3 bg-indigo-50 text-indigo-600 rounded-lg">
+          <Link to="/dashboard" className="flex items-center space-x-3 px-4 py-3 bg-emerald-50 text-emerald-600 rounded-lg">
             <FiGrid className="w-5 h-5" />
             <span>Dashboard</span>
           </Link>
@@ -249,7 +249,7 @@ const CoursePlayer = () => {
                 href={`/uploads/pdfs/${activeLesson.pdfFile?.filename}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 mt-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+                className="inline-flex items-center space-x-2 mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
               >
                 <FiDownload className="w-5 h-5" />
                 <span>Télécharger le PDF</span>
@@ -288,7 +288,7 @@ const CoursePlayer = () => {
                     onClick={() => setActiveTab(tab)}
                     className={`pb-4 text-sm font-medium capitalize transition-colors border-b-2 ${
                       activeTab === tab
-                        ? 'border-indigo-600 text-indigo-600'
+                        ? 'border-emerald-600 text-emerald-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
@@ -323,7 +323,7 @@ const CoursePlayer = () => {
                       className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
                         isLessonCompleted(activeLesson?._id)
                           ? 'bg-green-100 text-green-700 cursor-default'
-                          : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                          : 'bg-emerald-600 text-white hover:bg-emerald-700'
                       }`}
                     >
                       <FiCheckCircle className="w-5 h-5" />
@@ -355,7 +355,7 @@ const CoursePlayer = () => {
                         href={`/uploads/pdfs/${activeLesson.pdfFile.filename}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center space-x-2 px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                       >
                         <FiDownload className="w-5 h-5" />
                         <span>Télécharger</span>
@@ -392,7 +392,7 @@ const CoursePlayer = () => {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
+              className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -445,7 +445,7 @@ const CoursePlayer = () => {
                               disabled={isLocked}
                               className={`w-full flex items-start space-x-3 p-3 rounded-lg text-left transition-colors ${
                                 isActive
-                                  ? 'bg-indigo-50 border border-indigo-200'
+                                  ? 'bg-emerald-50 border border-emerald-200'
                                   : isLocked
                                   ? 'opacity-50 cursor-not-allowed'
                                   : 'hover:bg-gray-50'
@@ -457,11 +457,11 @@ const CoursePlayer = () => {
                                 ) : isLocked ? (
                                   <FiLock className="w-5 h-5 text-gray-400" />
                                 ) : (
-                                  <FiPlayCircle className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-gray-400'}`} />
+                                  <FiPlayCircle className={`w-5 h-5 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} />
                                 )}
                               </div>
                               <div className="flex-1">
-                                <p className={`font-medium ${isActive ? 'text-indigo-900' : 'text-gray-700'}`}>
+                                <p className={`font-medium ${isActive ? 'text-emerald-900' : 'text-gray-700'}`}>
                                   {lesson.title}
                                 </p>
                                 <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">

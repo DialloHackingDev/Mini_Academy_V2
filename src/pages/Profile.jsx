@@ -1,30 +1,45 @@
 import { useEffect, useState } from "react";
-import { profilUser } from "../api/userApi.jsx";
+import { useAuth } from "../context/AuthContext";
+import AmazonNavbar from "../components/AmazonNavbar.jsx";
+import SettingsView from "../components/SettingsView.jsx";
+import api from "../api/api";
 
 export default function Profile() {
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfile = async () => {
       try {
-        const data = await profilUser();
-        setProfile(data);
+        const res = await api.get("/users/profile");
+        setProfile(res.data?.user || res.data);
       } catch (err) {
         console.error("Erreur chargement profil", err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
+    fetchProfile();
   }, []);
 
-  if (!profile) return <p className="text-center mt-10">Chargement...</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AmazonNavbar />
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-lg mx-auto bg-white rounded-xl shadow-md">
-  <h2 className="text-2xl font-bold mb-4">Mon Profil</h2>
-  <p><strong>Nom :</strong> {profile.username}</p>
-  <p><strong>Email :</strong> {profile.email}</p>
-  <p><strong>Rôle :</strong> {profile.role}</p>
-</div>
-
+    <div className="min-h-screen bg-gray-50">
+      <AmazonNavbar />
+      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <SettingsView userProfile={profile || user} onProfileUpdate={setProfile} />
+      </div>
+    </div>
   );
 }

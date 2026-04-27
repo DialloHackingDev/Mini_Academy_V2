@@ -7,12 +7,15 @@ import Courses from "./pages/Courses.jsx";
 import CourseDetails from "./pages/CourseDetails.jsx";
 import CourseViewer from "./pages/CourseViewer.jsx";
 import Cart from "./pages/Cart.jsx";
+import Wishlist from "./pages/Wishlist.jsx";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./pages/Dashboard.jsx";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import CertificatePage from "./pages/CertificatePage";
+import VerifyCertificate from "./pages/VerifyCertificate";
+import ProfilePage from "./pages/Profile.jsx";
 
 export default function App() {
   return (
@@ -39,6 +42,12 @@ export default function App() {
           </PrivateRoute>
         } />
 
+        <Route path="/wishlist" element={
+          <PrivateRoute allowedRoles={['eleve','prof','admin']}>
+            <Wishlist />
+          </PrivateRoute>
+        } />
+
         <Route path="/certificate/:courseId" element={
           <PrivateRoute allowedRoles={['eleve']}>
             <CertificatePage />
@@ -59,6 +68,16 @@ export default function App() {
 
         {/* 🔹 Dashboard générique */}
         <Route path="/dashboard" element={<><AmazonNavbar /><Dashboard /></>} />
+
+        {/* 🔹 Profil utilisateur */}
+        <Route path="/profile" element={
+          <PrivateRoute allowedRoles={['eleve','prof','admin']}>
+            <ProfilePage />
+          </PrivateRoute>
+        } />
+
+        {/* 🔹 Vérification de certificat (public) */}
+        <Route path="/verify-cert/:courseId/:userId" element={<VerifyCertificate />} />
 
         {/* 🔹 Route inconnue → Home */}
         <Route path="*" element={<Navigate to="/" replace />} />

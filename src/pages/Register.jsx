@@ -24,7 +24,7 @@ const roleOptions = [
     label: 'Student', 
     icon: FaUserGraduate, 
     description: 'Learn and grow',
-    color: 'indigo'
+    color: 'emerald'
   },
   { 
     id: 'prof', 
@@ -87,15 +87,15 @@ export default function Register() {
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-indigo-100 via-purple-100 to-indigo-200 relative overflow-hidden"
+        className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-emerald-100 via-purple-100 to-emerald-200 relative overflow-hidden"
       >
         <div className="absolute inset-0 flex flex-col justify-between p-12">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-purple-600 rounded-xl flex items-center justify-center">
               <FaGraduationCap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
               Mini Academy
             </span>
           </div>
@@ -117,7 +117,7 @@ export default function Register() {
                 S
               </div>
               <div>
-                <FaQuoteLeft className="w-5 h-5 text-indigo-400 mb-2" />
+                <FaQuoteLeft className="w-5 h-5 text-emerald-400 mb-2" />
                 <p className="text-gray-700 text-sm mb-2">"The best platform for focused learning."</p>
                 <p className="text-gray-500 text-xs">Sarah J. - UX Design Student</p>
               </div>
@@ -170,7 +170,7 @@ export default function Register() {
                   placeholder="John Doe"
                   onChange={handleChange}
                   autoComplete="name"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
                   required
                   disabled={loading}
                 />
@@ -189,7 +189,7 @@ export default function Register() {
                   placeholder="you@example.com"
                   onChange={handleChange}
                   autoComplete="email"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
                   required
                   disabled={loading}
                 />
@@ -208,7 +208,7 @@ export default function Register() {
                   placeholder="••••••••"
                   onChange={handleChange}
                   autoComplete="new-password"
-                  className="w-full pl-12 pr-12 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
                   required
                   disabled={loading}
                 />
@@ -262,7 +262,7 @@ export default function Register() {
             {/* Terms Checkbox */}
             <label className="flex items-start gap-3 cursor-pointer">
               <div className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                agreedToTerms ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'
+                agreedToTerms ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300'
               }`}>
                 {agreedToTerms && <FiCheck className="w-3 h-3 text-white" />}
               </div>
@@ -273,7 +273,7 @@ export default function Register() {
                 className="hidden"
               />
               <span className="text-sm text-gray-600">
-                I agree to the <Link to="#" className="text-indigo-600 hover:text-indigo-700 font-medium">Terms of Service</Link> and <Link to="#" className="text-indigo-600 hover:text-indigo-700 font-medium">Privacy Policy</Link>.
+                I agree to the <Link to="#" className="text-emerald-600 hover:text-emerald-700 font-medium">Terms of Service</Link> and <Link to="#" className="text-emerald-600 hover:text-emerald-700 font-medium">Privacy Policy</Link>.
               </span>
             </label>
 
@@ -281,7 +281,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading || !agreedToTerms}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-emerald-600 to-purple-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -293,7 +293,7 @@ export default function Register() {
 
           <p className="text-center mt-6 text-sm text-gray-600">
             Already have an account?{" "}
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-medium">
               Log in
             </Link>
           </p>

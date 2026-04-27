@@ -56,7 +56,7 @@ export default function AdminDashboard() {
   };
 
   const Sidebar = () => (
-    <aside className={`fixed inset-y-0 left-0 z-50 w-80 bg-slate-900 flex flex-col transform transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:relative lg:translate-x-0 lg:flex`}>
+    <aside className={`fixed inset-y-0 left-0 z-40 w-80 bg-slate-900 flex flex-col transform transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:relative lg:translate-x-0 lg:flex`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">

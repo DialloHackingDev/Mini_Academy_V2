@@ -34,7 +34,7 @@ export default function AdminAnalytics({ data = {} }) {
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3 text-indigo-600">
+          <div className="flex items-center gap-3 text-emerald-600">
             <FiAward className="w-5 h-5" />
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Taux de certificats</p>
           </div>

@@ -12,7 +12,8 @@ import {
   FiArrowRight,
   FiPlayCircle,
   FiSearch,
-  FiChevronRight
+  FiChevronRight,
+  FiMessageSquare
 } from "react-icons/fi";
 import {
   FaGraduationCap,
@@ -26,6 +27,7 @@ import AmazonNavbar from "../components/AmazonNavbar";
 import SettingsView from "../components/SettingsView";
 import StudentAnalyticsView from "../components/StudentAnalyticsView";
 import ProgressView from "../components/ProgressView";
+import StudentReviewsView from "../components/StudentReviewsView";
 import ProfileComponent from "../components/ProfileComponent";
 import { useAuth } from "../context/AuthContext";
 
@@ -35,6 +37,7 @@ const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: FiGrid },
   { id: 'progress', label: 'Ma Progression', icon: FiPlayCircle },
   { id: 'mycourses', label: 'Mes Cours', icon: FiBook },
+  { id: 'reviews', label: 'Mes Avis', icon: FiMessageSquare },
   { id: 'analytics', label: 'Analytique', icon: FiBarChart2 },
   { id: 'settings', label: 'Paramètres', icon: FiSettings },
 ];
@@ -101,15 +104,15 @@ export default function StudentDashboard() {
   const certificatesCount = progressions.filter(p => p.certificateEarned).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="h-screen bg-slate-50 flex flex-col font-sans overflow-hidden">
       <AmazonNavbar />
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar (Desktop) */}
-        <aside className="w-80 bg-white border-r border-gray-200 hidden lg:flex flex-col">
+        <aside className="fixed inset-y-0 left-0 z-40 w-80 bg-slate-900 flex flex-col transform transition-transform duration-300  lg:translate-x-0 lg:flex lg:relative lg:translate-x-0 hidden">
           <div className="flex-1 py-10 px-6 space-y-3">
              <div className="px-5 mb-8 flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20 overflow-hidden">
+                <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/20 overflow-hidden">
                    {user?.profileImage ? (
                      <img src={`http://localhost:5000/uploads/profiles/${user.profileImage}`} className="w-full h-full object-cover" alt="" />
                    ) : (
@@ -367,8 +370,14 @@ export default function StudentDashboard() {
               )}
 
               {activeTab === 'settings' && (
-                <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   <SettingsView userProfile={profile} onProfileUpdate={(p) => setProfile(p)} />
+                </motion.div>
+              )}
+
+              {activeTab === 'reviews' && (
+                <motion.div key="reviews" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <StudentReviewsView />
                 </motion.div>
               )}
             </AnimatePresence>

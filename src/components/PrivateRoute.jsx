@@ -17,7 +17,7 @@ export default function PrivateRoute({ allowedRoles, children }) {
   // Si token existe mais pas encore dans le contexte → attendre un peu
   if (token && !user && loading) {
     return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
     </div>;
   }
 

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaExpand, FaCompress, FaDownload } from 'react-icons/fa';
 
-export default function VideoPlayer({ src, title, downloadUrl, className = "" }) {
+export default function VideoPlayer({ src, title, downloadUrl, poster, className = "" }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -105,7 +105,11 @@ export default function VideoPlayer({ src, title, downloadUrl, className = "" })
       <video
         ref={videoRef}
         src={src}
+        poster={poster}
+        playsInline
+        preload="metadata"
         className="w-full h-full"
+        style={{ objectFit: 'cover' }}
         onClick={togglePlay}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setShowControls(false)}

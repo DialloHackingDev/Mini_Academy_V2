@@ -20,10 +20,12 @@ import {
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { getMyNotifications, markNotificationAsRead, deleteNotification } from "../api/notificationApi";
 
 export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -34,6 +36,15 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   const [searchInput, setSearchInput] = useState(searchValue);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const token = user?.token;
   const role = user?.role;
@@ -55,7 +66,14 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
     return () => clearInterval(interval);
   }, [token]);
 
-  // Fetch notifications when token is available
+  // Fetch initial notification count
+  useEffect(() => {
+    if (token) {
+      fetchNotifications();
+    }
+  }, [token]);
+
+  // Re-fetch full notifications when dropdown opens
   useEffect(() => {
     if (token && notificationsOpen) {
       fetchNotifications();
@@ -138,18 +156,18 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
   };
 
   return (
-    <nav className="bg-slate-900 text-white sticky top-0 z-50 shadow-lg">
+    <nav className={`sticky top-0 z-50 transition-all duration-300 text-white ${isScrolled ? 'bg-slate-900/80 backdrop-blur-md shadow-xl py-1' : 'bg-slate-900 py-2'}`}>
       {/* Main Navbar */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4 h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/20">
               <FaGraduationCap className="w-6 h-6 text-white" />
             </div>
             <div className="hidden sm:block">
-              <span className="text-lg font-bold text-white leading-tight block">Elevated</span>
-              <span className="text-xs text-emerald-400">Academy</span>
+              <span className="text-lg font-black text-white leading-tight block tracking-tight">Elevated</span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Academy</span>
             </div>
           </Link>
 
@@ -158,15 +176,15 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
             <div className="relative flex">
               <input 
                 type="text" 
-                placeholder="Rechercher des cours..."
+                placeholder={t('search_placeholder')}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={handleSearch}
-                className="flex-1 bg-white text-gray-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-l-md"
+                className="flex-1 bg-white/10 backdrop-blur-md text-white px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 rounded-l-2xl border border-white/10 placeholder:text-slate-400 transition-all"
               />
               <button 
                 onClick={handleSearchClick}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 px-4 py-2.5 rounded-r-md transition-all"
+                className="bg-emerald-500 hover:bg-emerald-600 px-5 py-2.5 rounded-r-2xl transition-all shadow-lg shadow-emerald-500/20 border-l border-white/10"
               >
                 <FiSearch className="w-5 h-5 text-white" />
               </button>
@@ -176,9 +194,9 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
           {/* Right Actions - Desktop */}
           <div className="hidden lg:flex items-center gap-1 flex-shrink-0">
             {/* Courses Link */}
-            <Link to="/courses" className="flex items-center gap-1 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors">
-              <FiBook className="w-5 h-5" />
-              <span className="text-sm font-medium">Cours</span>
+            <Link to="/courses" className="flex items-center gap-1 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white">
+              <FiBook className="w-5 h-5 text-white" />
+              <span className="text-sm font-medium">{t('nav_courses')}</span>
             </Link>
 
             {!token ? (
@@ -188,13 +206,13 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                   to="/login" 
                   className="hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
                 >
-                  <span className="text-sm font-medium">Connexion</span>
+                  <span className="text-sm font-medium">{t('login')}</span>
                 </Link>
                 <Link 
                   to="/register" 
                   className="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                 >
-                  S'inscrire
+                  {t('register')}
                 </Link>
                 {/* Teacher Registration */}
                 <Link 
@@ -202,7 +220,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                   className="flex items-center gap-1 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
                 >
                   <FaChalkboardTeacher className="w-4 h-4" />
-                  <span className="text-sm font-medium">Devenir Prof</span>
+                  <span className="text-sm font-medium">{t('become_teacher')}</span>
                 </Link>
               </>
             ) : (
@@ -215,7 +233,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                 >
                   <FiGrid className="w-5 h-5" />
                   <span className="text-sm font-medium">
-                    {role === 'eleve' ? 'Élève' : role === 'prof' ? 'Prof' : 'Admin'}
+                    {role === 'eleve' ? t('eleve') : role === 'prof' ? t('prof') : t('admin')}
                   </span>
                 </Link>
 
@@ -226,7 +244,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                     className="flex items-center gap-1 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
                   >
                     <FiPlayCircle className="w-5 h-5" />
-                    <span className="text-sm font-medium">Apprentissage</span>
+                    <span className="text-sm font-medium">{t('learning')}</span>
                   </Link>
                 )}
 
@@ -237,7 +255,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                     className="flex items-center gap-1 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
                   >
                     <FiPlusCircle className="w-5 h-5" />
-                    <span className="text-sm font-medium">Créer</span>
+                    <span className="text-sm font-medium">{t('create')}</span>
                   </Link>
                 )}
 
@@ -245,9 +263,9 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                 <div className="relative">
                   <button 
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
+                    className="relative hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white"
                   >
-                    <FiBell className="w-6 h-6" />
+                    <FiBell className="w-6 h-6 text-white" />
                     {notificationCount > 0 && (
                       <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
                         {notificationCount > 9 ? '9+' : notificationCount}
@@ -264,16 +282,16 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                       className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
                     >
                       <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 rounded-t-xl">
-                        <p className="text-sm font-semibold text-gray-900">Notifications</p>
+                        <p className="text-sm font-semibold text-gray-900">{t('nav_notifications')}</p>
                       </div>
                       
                       {loadingNotifications ? (
                         <div className="px-4 py-8 text-center">
-                          <p className="text-sm text-gray-500">Chargement...</p>
+                          <p className="text-sm text-gray-500">{t('nav_loading')}</p>
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="px-4 py-8 text-center">
-                          <p className="text-sm text-gray-500">Aucune notification</p>
+                          <p className="text-sm text-gray-500">{t('nav_no_notifications')}</p>
                         </div>
                       ) : (
                         <div className="divide-y divide-gray-100">
@@ -310,15 +328,15 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                 </div>
 
                 {/* Wishlist */}
-                <Link to="/wishlist" className="hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors">
-                  <FiHeart className="w-6 h-6" />
+                <Link to="/wishlist" className="hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white">
+                  <FiHeart className="w-6 h-6 text-white" />
                 </Link>
 
                 {/* User Dropdown */}
                 <div className="relative">
                   <button 
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors"
+                    className="flex items-center gap-2 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white"
                   >
                     <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center overflow-hidden">
                       {profileImage ? (
@@ -335,7 +353,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-semibold text-gray-900">{username || 'User'}</p>
-                        <p className="text-xs text-gray-500 capitalize">{role === 'eleve' ? 'Élève' : role === 'prof' ? 'Professeur' : 'Administrateur'}</p>
+                        <p className="text-xs text-gray-500 capitalize">{role === 'eleve' ? t('eleve') : role === 'prof' ? t('prof') : t('admin')}</p>
                       </div>
                       <Link 
                         to={getDashboardLink()} 
@@ -359,7 +377,7 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
                           className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                         >
                           <FiLogOut className="w-4 h-4" />
-                          Déconnexion
+                          {t('logout')}
                         </button>
                       </div>
                     </div>
@@ -369,9 +387,9 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
             )}
 
             {/* Cart - Dynamic count for connected users */}
-            <Link to="/cart" className="flex items-center hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors">
+            <Link to="/cart" className="flex items-center hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors text-white">
               <div className="relative">
-                <FiShoppingCart className="w-6 h-6" />
+                <FiShoppingCart className="w-6 h-6 text-white" />
                 {(token && cartCount > 0) && (
                   <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                     {cartCount > 9 ? '9+' : cartCount}
@@ -384,12 +402,11 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors text-white"
           >
-            {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+            {mobileMenuOpen ? <FiX className="w-6 h-6 text-white" /> : <FiMenu className="w-6 h-6 text-white" />}
           </button>
         </div>
       </div>
@@ -401,13 +418,13 @@ export default function AmazonNavbar({ searchValue = "", onSearchChange }) {
             <div className="flex items-center gap-6 h-10 text-sm">
               <Link to="/courses" className="hover:text-emerald-400 transition-colors flex items-center gap-1">
                 <FiBook className="w-4 h-4" />
-                Tous les cours
+                {t('all_courses')}
               </Link>
               {role === 'eleve' && (
                 <>
                   <Link to="/student-dashboard?tab=progress" className="hover:text-emerald-400 transition-colors flex items-center gap-1">
                     <FiPlayCircle className="w-4 h-4" />
-                    Ma Progression
+                    {t('nav_my_progress')}
                   </Link>
                   <Link to="/student-dashboard?tab=mycourses" className="hover:text-emerald-400 transition-colors flex items-center gap-1">
                     <FiGrid className="w-4 h-4" />

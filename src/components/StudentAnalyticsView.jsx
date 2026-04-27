@@ -51,7 +51,7 @@ export default function StudentAnalyticsView({ stats }) {
     { label: "Temps d'apprentissage", value: formatTime(stats?.totalTimeSpentSeconds), isPositive: true, icon: FiClock, color: "blue" },
     { label: "Progression Moyenne", value: `${stats?.avgProgress || 0}%`, isPositive: true, icon: FiTrendingUp, color: "emerald" },
     { label: "Certificats Obtenus", value: stats?.certificatesCount || 0, isPositive: true, icon: FiAward, color: "amber" },
-    { label: "Investissement", value: `${stats?.totalSpent || 0}€`, isPositive: true, icon: FiDollarSign, color: "indigo" },
+    { label: "Investissement", value: `${stats?.totalSpent || 0}€`, isPositive: true, icon: FiDollarSign, color: "emerald" },
   ];
 
   const handleExport = () => {

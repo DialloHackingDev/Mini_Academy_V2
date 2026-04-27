@@ -32,6 +32,7 @@ import {
 import { getCourses } from "../api/courApi.jsx";
 import AmazonNavbar from "../components/AmazonNavbar.jsx";
 import { FaGraduationCap } from "react-icons/fa";
+import { getPlatformReviews } from "../api/platformReviewApi.jsx";
 
 // Animation hook
 const useAnimatedInView = () => {
@@ -114,10 +115,10 @@ function HeroBanner() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4"
+                className="text-4xl sm:text-5xl lg:text-7xl font-black leading-tight mb-6 tracking-tight"
               >
                 Formez-vous aux métiers de{" "}
-                <span className="text-emerald-400">demain</span>
+                <span className="text-gradient">demain</span>
               </motion.h1>
 
               <motion.p 
@@ -149,6 +150,10 @@ function HeroBanner() {
                   Commencer gratuitement
                 </Link>
               </motion.div>
+
+              {/* Floating elements for depth */}
+              <div className="absolute -top-20 -left-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse-soft hidden lg:block" />
+              <div className="absolute top-1/2 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-float hidden lg:block" />
 
               {/* Stats */}
               <motion.div 
@@ -329,12 +334,12 @@ function FreeCoursesSlider({ courses }) {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             e.target.style.display = 'none';
-                            e.target.parentElement.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center"><svg class="w-12 h-12 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></div>`;
+                            e.target.parentElement.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-emerald-100 to-purple-100 flex items-center justify-center"><svg class="w-12 h-12 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></div>`;
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                          <FiPlayCircle className="w-12 h-12 text-indigo-400" />
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-purple-100 flex items-center justify-center">
+                          <FiPlayCircle className="w-12 h-12 text-emerald-400" />
                         </div>
                       )}
                       {/* Level Badge */}
@@ -358,7 +363,7 @@ function FreeCoursesSlider({ courses }) {
                         <span>Dirigé par un instructeur</span>
                       </div>
                       
-                      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors">
                         {course.title}
                       </h3>
                       
@@ -477,7 +482,7 @@ function CoursesSlider({ courses }) {
           </div>
           <Link 
             to="/courses" 
-            className="hidden sm:flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+            className="hidden sm:flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
           >
             View All Paths
             <FiArrowRight className="w-5 h-5" />
@@ -525,16 +530,16 @@ function CoursesSlider({ courses }) {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center"><svg class="w-12 h-12 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></div>`;
+                              e.target.parentElement.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-emerald-100 to-purple-100 flex items-center justify-center"><svg class="w-12 h-12 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></div>`;
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                            <FiPlayCircle className="w-12 h-12 text-indigo-400" />
+                          <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-purple-100 flex items-center justify-center">
+                            <FiPlayCircle className="w-12 h-12 text-emerald-400" />
                           </div>
                         )}
                         {/* Level Badge */}
-                        <span className="absolute top-3 left-3 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded">
+                        <span className="absolute top-3 left-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded">
                           {course.level || 'DÉBUTANT'}
                         </span>
                         {/* Share Button */}
@@ -554,7 +559,7 @@ function CoursesSlider({ courses }) {
                           <span>Dirigé par un instructeur</span>
                         </div>
                         
-                        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors">
                           {course.title}
                         </h3>
                         
@@ -587,7 +592,7 @@ function CoursesSlider({ courses }) {
           viewport={{ once: true }}
           className="mt-8 text-center sm:hidden"
         >
-          <Link to="/courses" className="inline-flex items-center gap-2 text-indigo-600 font-medium">
+          <Link to="/courses" className="inline-flex items-center gap-2 text-emerald-600 font-medium">
             View All Paths
             <FiArrowRight className="w-4 h-4" />
           </Link>
@@ -599,21 +604,26 @@ function CoursesSlider({ courses }) {
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await getCourses();
-        setCourses((data.data || data).slice(0, 6));
+        const [coursesData, reviewsData] = await Promise.all([
+          getCourses(),
+          getPlatformReviews()
+        ]);
+        setCourses((coursesData.data || coursesData).slice(0, 6));
+        setReviews(reviewsData.reviews || []);
       } catch (e) {
-        console.error("Error fetching courses:", e);
+        console.error("Error fetching home data:", e);
       } finally {
         setLoading(false);
       }
     };
-    fetchCourses();
+    loadData();
   }, []);
 
   const fadeInUp = {
@@ -638,7 +648,7 @@ export default function Home() {
       {/* Hero Banner with Image Slider */}
       <HeroBanner />
 
-      {/* Domaines Section */}
+      {/* Domaines Section - Moved after Hero */}
       <section className="py-16 lg:py-24 bg-gray-50">
         <div className="w-full mx-auto px-6 sm:px-8 lg:px-12">
           <motion.div
@@ -700,7 +710,7 @@ export default function Home() {
           >
             <Link 
               to="/courses"
-              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-indigo-600 text-indigo-600 font-semibold rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300"
+              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-emerald-600 text-emerald-600 font-semibold rounded-full hover:bg-emerald-600 hover:text-white transition-all duration-300"
             >
               Découvrir le catalogue complet
               <FiArrowRight className="w-4 h-4" />
@@ -709,11 +719,74 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Partners Section */}
+      <section className="py-12 bg-white border-y border-slate-100">
+        <div className="max-w-7xl mx-auto px-6">
+           <p className="text-center text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-10">Propulsé par les leaders de l'industrie</p>
+           <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-24 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Cisco_logo_blue_2016.svg/1200px-Cisco_logo_blue_2016.svg.png" className="h-8 lg:h-10" alt="Cisco" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1200px-Python-logo-notext.svg.png" className="h-10 lg:h-12" alt="Python" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png" className="h-10 lg:h-12" alt="AWS" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png" className="h-10 lg:h-12" alt="React" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Adobe_Photoshop_CC_icon.svg/1200px-Adobe_Photoshop_CC_icon.svg.png" className="h-10 lg:h-12" alt="Adobe" />
+           </div>
+        </div>
+      </section>
+
       {/* Free Courses Slider Section */}
       <FreeCoursesSlider courses={courses} />
 
+      {/* Testimonials Section - DELETED FROM HERE */}
+
       {/* Curated Paths Section - Slider */}
       <CoursesSlider courses={courses} />
+
+      {/* Testimonials Section - Moved here and made dynamic */}
+      {reviews.length > 0 && (
+        <section className="py-24 bg-slate-50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-emerald-500/5 blur-[120px] rounded-full -mr-20" />
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="text-center mb-16">
+                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-4">Ce que disent nos apprenants</h2>
+                <p className="text-slate-500 text-lg max-w-2xl mx-auto">Rejoignez des milliers d'étudiants qui ont transformé leur carrière grâce à nos formations d'excellence.</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+                {reviews.map((t, i) => (
+                  <motion.div 
+                    key={t._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    whileHover={{ y: -10 }}
+                    className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-premium group"
+                  >
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-14 h-14 bg-emerald-100 rounded-2xl overflow-hidden flex items-center justify-center">
+                        {t.userId?.profileImage ? (
+                          <img src={`http://localhost:5000/uploads/profiles/${t.userId.profileImage}`} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span className="text-xl font-bold text-emerald-600">{t.userId?.username?.[0]?.toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-black text-slate-900">{t.userId?.username}</p>
+                        <p className="text-emerald-600 text-[10px] font-black uppercase tracking-widest">Étudiant Certifié</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <FiStar key={i} className={`${i < t.rating ? 'text-orange-400 fill-current' : 'text-slate-200'} w-4 h-4`} />
+                      ))}
+                    </div>
+                    <p className="text-slate-600 italic leading-relaxed text-sm">"{t.comment}"</p>
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer ref={footerRef} className="bg-gray-50 border-t border-gray-200 mt-auto">
@@ -726,7 +799,7 @@ export default function Home() {
           >
             <motion.div variants={fadeInUp} className="col-span-2 md:col-span-1">
               <Link to="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <FaGraduationCap className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-bold text-gray-900">Elevated Academy</span>

@@ -19,7 +19,7 @@ import {
 } from "react-icons/fa";
 
 const roles = [
-  { id: 'eleve', label: 'Student', icon: FaUserGraduate, color: 'indigo' },
+  { id: 'eleve', label: 'Student', icon: FaUserGraduate, color: 'emerald' },
   { id: 'prof', label: 'Teacher', icon: FaUserTie, color: 'purple' },
   { id: 'admin', label: 'Admin', icon: FaUserShield, color: 'emerald' }
 ];
@@ -116,7 +116,7 @@ export default function Login() {
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 relative overflow-hidden"
+        className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-900 via-purple-900 to-emerald-800 relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute inset-0 flex items-center justify-center p-12">
@@ -146,7 +146,7 @@ export default function Login() {
         >
           {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-purple-600 rounded-xl flex items-center justify-center">
               <FaGraduationCap className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">Elevated Academy</span>
@@ -214,7 +214,7 @@ export default function Login() {
                   placeholder="Enter your email"
                   onChange={handleChange}
                   autoComplete="email"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
                   required
                   disabled={loading}
                 />
@@ -233,7 +233,7 @@ export default function Login() {
                   placeholder="••••••••"
                   onChange={handleChange}
                   autoComplete="current-password"
-                  className="w-full pl-12 pr-12 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
                   required
                   disabled={loading}
                 />
@@ -251,7 +251,7 @@ export default function Login() {
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                  rememberMe ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'
+                  rememberMe ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300'
                 }`}>
                   {rememberMe && <FiCheck className="w-3 h-3 text-white" />}
                 </div>
@@ -263,7 +263,7 @@ export default function Login() {
                 />
                 <span className="text-sm text-gray-600">Remember for 30 days</span>
               </label>
-              <Link to="#" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+              <Link to="#" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                 Forgot password?
               </Link>
             </div>
@@ -272,7 +272,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-emerald-600 to-purple-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -284,7 +284,7 @@ export default function Login() {
 
           <p className="text-center mt-6 text-sm text-gray-600">
             Don't have an account?{" "}
-            <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link to="/register" className="text-emerald-600 hover:text-emerald-700 font-medium">
               Request access
             </Link>
           </p>

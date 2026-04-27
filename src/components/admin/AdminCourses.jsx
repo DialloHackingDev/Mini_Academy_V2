@@ -196,7 +196,7 @@ export default function AdminCourses({ courses = [], onDelete, onRefresh }) {
                 </td>
                 <td className="px-6 py-4 text-slate-700 flex items-center gap-2">
                   <FiDollarSign className="w-4 h-4 text-slate-400" />
-                  <span>{course.price ? `${course.price} €` : 'Gratuit'}</span>
+                  <span>{course.price ? `${course.price}` : 'Gratuit'}</span>
                 </td>
                 <td className="px-6 py-4 text-slate-500">{new Date(course.createdAt).toLocaleDateString('fr-FR')}</td>
                 <td className="px-6 py-4">

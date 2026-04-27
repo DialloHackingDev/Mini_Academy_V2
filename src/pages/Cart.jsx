@@ -292,8 +292,8 @@ export default function Cart() {
                       <div className="p-6">
                         <div className="flex gap-6">
                           {/* Course Image */}
-                          <div className="w-32 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FaGraduationCap className="w-10 h-10 text-indigo-400" />
+                          <div className="w-32 h-24 bg-gradient-to-br from-emerald-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FaGraduationCap className="w-10 h-10 text-emerald-400" />
                           </div>
 
                           {/* Course Info */}
@@ -334,7 +334,7 @@ export default function Cart() {
                               </span>
                             </div>
 
-                            {/* Price & Quantity */}
+                            {/* Price */}
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-2xl font-bold text-gray-900">
@@ -346,26 +346,6 @@ export default function Cart() {
                                 <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
                                   -{Math.round((1 - item.price / item.originalPrice) * 100)}%
                                 </span>
-                              </div>
-
-                              {/* Quantity Control */}
-                              <div className="flex items-center gap-3 bg-gray-100 rounded-lg p-1">
-                                <button
-                                  onClick={() => updateQuantity(item._id, -1)}
-                                  disabled={item.quantity <= 1}
-                                  className="w-8 h-8 flex items-center justify-center bg-white rounded-md shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                  <FiMinus className="w-4 h-4" />
-                                </button>
-                                <span className="w-8 text-center font-medium">
-                                  {item.quantity}
-                                </span>
-                                <button
-                                  onClick={() => updateQuantity(item._id, 1)}
-                                  className="w-8 h-8 flex items-center justify-center bg-white rounded-md shadow-sm hover:shadow transition-all"
-                                >
-                                  <FiPlus className="w-4 h-4" />
-                                </button>
                               </div>
                             </div>
                           </div>
@@ -433,12 +413,12 @@ export default function Cart() {
                     {promoApplied && (
                       <div className="flex justify-between text-emerald-600">
                         <span>Réduction (20%)</span>
-                        <span>-${discountAmount.toFixed(2)}</span>
+                        <span>-{discountAmount.toFixed(2)} $</span>
                       </div>
                     )}
                     <div className="flex justify-between text-emerald-600">
                       <span>Économies</span>
-                      <span>-${totalSavings.toFixed(2)}</span>
+                      <span>-{totalSavings.toFixed(2)} $</span>
                     </div>
                     <div className="border-t border-gray-200 pt-4">
                       <div className="flex justify-between items-center">
@@ -485,11 +465,11 @@ export default function Cart() {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center overflow-hidden">
+                    <div className="h-40 bg-gradient-to-br from-emerald-100 to-purple-100 flex items-center justify-center overflow-hidden">
                       {course.coverImage ? (
                         <img src={`http://localhost:5000/uploads/covers/${course.coverImage.filename}`} className="w-full h-full object-cover" alt="" />
                       ) : (
-                        <FaGraduationCap className="w-12 h-12 text-indigo-400" />
+                        <FaGraduationCap className="w-12 h-12 text-emerald-400" />
                       )}
                     </div>
                     <div className="p-4">
@@ -560,7 +540,7 @@ export default function Cart() {
                       <span className="text-gray-600">
                         {item.title} (x{item.quantity})
                       </span>
-                      <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="font-medium">{(item.price * item.quantity).toFixed(2)} $</span>
                     </div>
                   ))}
                   <div className="border-t border-gray-200 pt-2 mt-2">

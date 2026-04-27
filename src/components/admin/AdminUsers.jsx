@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FiSearch, FiTrash2, FiSlash, FiUserCheck, FiPlus, FiX, FiCheckCircle } from "react-icons/fi";
+import { FiSearch, FiTrash2, FiSlash, FiUserCheck, FiPlus, FiX, FiCheckCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { createUser } from "../../api/adminApi";
 
 const roleLabels = {
@@ -17,6 +17,10 @@ export default function AdminUsers({ users = [], onDelete, onDisable, onRefresh 
   const [createError, setCreateError] = useState('');
   const [createSuccess, setCreateSuccess] = useState('');
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchesQuery = [user.username, user.email, roleLabels[user.role] || user.role]
@@ -26,6 +30,22 @@ export default function AdminUsers({ users = [], onDelete, onDisable, onRefresh 
       return matchesQuery && matchesRole;
     });
   }, [users, query, roleFilter]);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredUsers.slice(start, start + itemsPerPage);
+  }, [filteredUsers, currentPage]);
+
+  const handleQueryChange = (e) => {
+    setQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleRoleChange = (e) => {
+    setRoleFilter(e.target.value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -60,7 +80,7 @@ export default function AdminUsers({ users = [], onDelete, onDisable, onRefresh 
               type="text"
               aria-label="Recherche des utilisateurs"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={handleQueryChange}
               placeholder="Rechercher par nom, email ou rôle"
               className="w-full bg-transparent pl-10 text-sm text-slate-900 outline-none"
             />
@@ -68,7 +88,7 @@ export default function AdminUsers({ users = [], onDelete, onDisable, onRefresh 
 
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={handleRoleChange}
             className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
           >
             <option value="all">Tous les rôles</option>
@@ -92,11 +112,11 @@ export default function AdminUsers({ users = [], onDelete, onDisable, onRefresh 
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
-            {filteredUsers.length === 0 ? (
+            {paginatedUsers.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-6 py-8 text-center text-slate-500">Aucun utilisateur trouvé.</td>
               </tr>
-            ) : filteredUsers.map((user) => (
+            ) : paginatedUsers.map((user) => (
               <tr key={user._id} className="hover:bg-slate-50">
                 <td className="px-6 py-4 font-semibold text-slate-900">{user.username}</td>
                 <td className="px-6 py-4 text-slate-500">{user.email}</td>
@@ -129,6 +149,42 @@ export default function AdminUsers({ users = [], onDelete, onDisable, onRefresh 
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-6 py-4 bg-white rounded-3xl border border-slate-200 shadow-sm">
+          <p className="text-sm text-slate-500 font-medium">
+            Page <span className="font-bold text-slate-900">{currentPage}</span> sur <span className="font-bold text-slate-900">{totalPages}</span>
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              <FiChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="flex gap-1">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-10 h-10 rounded-xl text-xs font-bold transition ${currentPage === i + 1 ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              <FiChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40">
