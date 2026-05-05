@@ -106,94 +106,94 @@ export default function CertificatePage() {
         ref={certificateRef}
       >
         {/* Corner Decor - Top Left */}
-        <div className="absolute top-0 left-0 w-64 h-64 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-32 h-32 md:w-64 md:h-64 overflow-hidden pointer-events-none">
            <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-[#111] transform -rotate-45 translate-x-[-20%] translate-y-[-20%]"></div>
-           <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-[#f59e0b] transform -rotate-45 translate-x-[20%] translate-y-[-5%] border-[16px] border-white z-[-1]"></div>
+           <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-[#f59e0b] transform -rotate-45 translate-x-[20%] translate-y-[-5%] border-[8px] md:border-[16px] border-white z-[-1]"></div>
            <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-gray-200 transform -rotate-45 translate-x-[35%] translate-y-[10%] z-[-2]"></div>
         </div>
 
         {/* Corner Decor - Bottom Right */}
-        <div className="absolute bottom-0 right-0 w-64 h-64 overflow-hidden pointer-events-none rotate-180">
+        <div className="absolute bottom-0 right-0 w-32 h-32 md:w-64 md:h-64 overflow-hidden pointer-events-none rotate-180">
            <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-[#111] transform -rotate-45 translate-x-[-20%] translate-y-[-20%]"></div>
-           <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-[#f59e0b] transform -rotate-45 translate-x-[20%] translate-y-[-5%] border-[16px] border-white z-[-1]"></div>
+           <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-[#f59e0b] transform -rotate-45 translate-x-[20%] translate-y-[-5%] border-[8px] md:border-[16px] border-white z-[-1]"></div>
            <div className="absolute top-[-50%] left-[-50%] w-[150%] h-[150%] bg-gray-200 transform -rotate-45 translate-x-[35%] translate-y-[10%] z-[-2]"></div>
         </div>
 
         {/* Certificate Content */}
-        <div className="absolute inset-[30px] border-[1px] border-gray-200 flex flex-col items-center justify-center p-12 text-center bg-white/80 z-10">
+        <div className="absolute inset-2 md:inset-[30px] border-[1px] border-gray-200 flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 text-center bg-white/80 z-10">
           
-          <div className="mb-8 mt-12">
-            <h1 className="text-5xl md:text-6xl font-black text-[#111] tracking-widest mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>
+          <div className="mb-2 md:mb-8 mt-4 md:mt-12">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[#111] tracking-widest mb-1 md:mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>
               CERTIFICATE
             </h1>
-            <h2 className="text-xl md:text-2xl font-bold text-gray-500 tracking-[0.2em] uppercase">
+            <h2 className="text-[10px] sm:text-sm md:text-xl lg:text-2xl font-bold text-gray-500 tracking-[0.2em] uppercase">
               Of Achievement
             </h2>
           </div>
 
-          <div className="mb-10 relative">
-            <div className="bg-[#f59e0b] text-white px-8 py-2 font-bold tracking-widest text-sm uppercase relative z-10 mx-auto inline-block">
+          <div className="mb-4 md:mb-10 relative">
+            <div className="bg-[#f59e0b] text-white px-4 sm:px-8 py-1 sm:py-2 font-bold tracking-widest text-[8px] sm:text-xs md:text-sm uppercase relative z-10 mx-auto inline-block">
               Ce certificat est fièrement décerné à
             </div>
             {/* Ribbon ends */}
-            <div className="absolute top-0 -left-3 w-4 h-full bg-[#d97706] skew-x-[30deg] z-0"></div>
-            <div className="absolute top-0 -right-3 w-4 h-full bg-[#d97706] -skew-x-[30deg] z-0"></div>
+            <div className="absolute top-0 -left-2 sm:-left-3 w-3 sm:w-4 h-full bg-[#d97706] skew-x-[30deg] z-0"></div>
+            <div className="absolute top-0 -right-2 sm:-right-3 w-3 sm:w-4 h-full bg-[#d97706] -skew-x-[30deg] z-0"></div>
           </div>
 
-          <div className="mb-10 w-full">
-            <h3 className="text-6xl md:text-7xl font-medium text-[#111] mb-6" style={{ fontFamily: "'Great Vibes', 'Brush Script MT', cursive" }}>
+          <div className="mb-4 md:mb-10 w-full">
+            <h3 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-[#111] mb-2 md:mb-6" style={{ fontFamily: "'Great Vibes', 'Brush Script MT', cursive" }}>
               {user.username}
             </h3>
-            <p className="max-w-2xl mx-auto text-gray-600 text-sm md:text-base leading-relaxed">
+            <p className="max-w-2xl mx-auto text-gray-600 text-[8px] sm:text-xs md:text-sm lg:text-base leading-relaxed px-4 md:px-0">
               a suivi et complété avec succès la formation professionnelle 
-              <br />
-              <strong className="text-black font-bold text-lg mt-2 inline-block">"{course.title}"</strong>
-              <br />
-              Démontrant une maîtrise des compétences requises et un engagement exceptionnel envers l'apprentissage continu.
+              <br className="hidden sm:block" />
+              <strong className="text-black font-bold text-xs sm:text-sm md:text-lg mt-1 md:mt-2 inline-block">"{course.title}"</strong>
+              <br className="hidden sm:block" />
+              <span className="hidden sm:inline">Démontrant une maîtrise des compétences requises et un engagement exceptionnel envers l'apprentissage continu.</span>
             </p>
           </div>
 
-          <div className="flex justify-between items-end w-full max-w-4xl mt-auto pt-10 pb-6">
+          <div className="flex justify-between items-end w-full max-w-4xl mt-auto pt-2 sm:pt-6 md:pt-10 pb-2 sm:pb-4 md:pb-6 px-2 sm:px-4">
             {/* Date Section */}
-            <div className="text-center w-48">
-              <div className="border-b-2 border-black pb-2 mb-2 font-bold text-lg">
+            <div className="text-center w-16 sm:w-32 md:w-48">
+              <div className="border-b border-black pb-1 md:pb-2 mb-1 md:mb-2 font-bold text-[8px] sm:text-sm md:text-lg">
                 {dateObtention}
               </div>
-              <div className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+              <div className="text-[6px] sm:text-[10px] md:text-xs font-bold tracking-widest text-gray-500 uppercase">
                 Date
               </div>
             </div>
 
             {/* Badge / Logo */}
-            <div className="flex flex-col items-center justify-center -mb-8">
-              <div className="relative w-32 h-32 flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center -mb-4 md:-mb-8">
+              <div className="relative w-12 h-12 sm:w-20 sm:h-20 md:w-32 md:h-32 flex items-center justify-center">
                 {/* Sunburst badge effect with CSS */}
                 <div className="absolute inset-0 bg-[#f59e0b] rounded-full scale-110" style={{ clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }}></div>
-                <div className="absolute inset-2 bg-[#111] rounded-full border-2 border-[#f59e0b] border-dashed flex flex-col items-center justify-center text-center p-2 z-10">
-                  <span className="text-[#f59e0b] text-[10px] font-black uppercase tracking-widest leading-tight">Academy</span>
-                  <span className="text-white text-xs font-bold uppercase tracking-widest border-t border-b border-[#f59e0b]/30 py-1 my-1">Certified</span>
-                  <span className="text-[#f59e0b] text-[10px] font-black uppercase tracking-widest">{new Date(progression?.certificateEarnedAt || new Date()).getFullYear()}</span>
+                <div className="absolute inset-1 md:inset-2 bg-[#111] rounded-full border border-dashed md:border-2 border-[#f59e0b] flex flex-col items-center justify-center text-center p-1 md:p-2 z-10">
+                  <span className="text-[#f59e0b] text-[4px] sm:text-[6px] md:text-[10px] font-black uppercase tracking-widest leading-tight">Academy</span>
+                  <span className="text-white text-[5px] sm:text-[8px] md:text-xs font-bold uppercase tracking-widest border-t border-b border-[#f59e0b]/30 py-0.5 md:py-1 my-0.5 md:my-1">Certified</span>
+                  <span className="text-[#f59e0b] text-[4px] sm:text-[6px] md:text-[10px] font-black uppercase tracking-widest">{new Date(progression?.certificateEarnedAt || new Date()).getFullYear()}</span>
                 </div>
               </div>
             </div>
 
             {/* Signature Section */}
-            <div className="text-center w-48">
-              <div className="border-b-2 border-black pb-2 mb-2 font-black text-2xl text-slate-800" style={{ fontFamily: 'Arial, sans-serif' }}>
-                ELEVATED ACADEMY
+            <div className="text-center w-16 sm:w-32 md:w-48">
+              <div className="border-b border-black pb-1 md:pb-2 mb-1 md:mb-2 font-black text-[8px] sm:text-sm md:text-2xl text-slate-800" style={{ fontFamily: 'Arial, sans-serif' }}>
+                ELEVATED
               </div>
-              <div className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+              <div className="text-[6px] sm:text-[10px] md:text-xs font-bold tracking-widest text-gray-500 uppercase">
                 La Direction
               </div>
             </div>
           </div>
 
           {/* QR Code */}
-          <div className="absolute bottom-10 left-10 flex flex-col items-center">
-             <div className="p-1 bg-white border border-gray-200 shadow-sm">
-                <QRCode value={verifyUrl} size={64} />
+          <div className="absolute bottom-2 left-2 md:bottom-10 md:left-10 flex flex-col items-center">
+             <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 p-0.5 md:p-1 bg-white border border-gray-200 shadow-sm flex items-center justify-center">
+                <QRCode value={verifyUrl} style={{ height: "100%", maxWidth: "100%", width: "100%" }} />
              </div>
-             <span className="text-[8px] text-gray-400 mt-1 uppercase tracking-widest">Scan to Verify</span>
+             <span className="text-[4px] sm:text-[6px] md:text-[8px] text-gray-400 mt-0.5 md:mt-1 uppercase tracking-widest">Scan to Verify</span>
           </div>
 
         </div>
